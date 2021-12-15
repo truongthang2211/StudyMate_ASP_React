@@ -17,7 +17,7 @@ public class MyInfoController : ControllerBase
         var body = reader.ReadToEnd();
         dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
 
-        int Email = (int)data.Email;
+        string Email = (string)data.Email;
 
         var context = new DBContext();
 
@@ -38,7 +38,7 @@ public class MyInfoController : ControllerBase
     }
 
 
-    [Route("api/update-password"), HttpPost]
+    [Route("api/update-password"), HttpPut]
     public JsonResult UpdatePassword()
     {
         var reader = new StreamReader(HttpContext.Request.Body);
@@ -52,9 +52,9 @@ public class MyInfoController : ControllerBase
 
         var context = new DBContext();
 
-        var acc = (from acc in context.accounts
-                   where acc.User_id == Userid
-                   select acc).FirstOrDefault();
+        var acc = (from a in context.accounts
+                   where a.User_id == Userid
+                   select a).FirstOrDefault();
 
         if (acc != null && BCrypt.Net.BCrypt.Verify(currentPassword, acc.Pwd))
         {

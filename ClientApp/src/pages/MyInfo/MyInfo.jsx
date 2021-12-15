@@ -157,6 +157,7 @@ function MyInfo({ User }) {
     const handleUpdatePassword = (e) => {
         e.preventDefault();
 
+
         if (password.newPassword !== password.confirmPassword) {
             Swal.fire({
                 text: 'Mật khẩu không hợp lệ',

@@ -20,8 +20,16 @@ public class ProfileController : ControllerBase
         int Cityid = (int)data.City_id;
         var context = new DBContext();
 
-        var city = from c in context.cities where c.City_id == Cityid select c;
-        return new JsonResult(city);
+        var city = from c in context.cities
+                   where c.City_id == Cityid
+                   select c;
+
+        var result = new
+        {
+            status = 200,
+            city = city,
+        };
+        return new JsonResult(result);
     }
 
 
@@ -42,7 +50,12 @@ public class ProfileController : ControllerBase
                        orderby l.Learn_time descending
                        select new { c.Course_id, c.Course_name, c.Img, c.Author_id }).Take(3);
 
-        return new JsonResult(courses);
+        var result = new
+        {
+            status = 200,
+            courses = courses,
+        };
+        return new JsonResult(result);
     }
 
 
@@ -66,7 +79,12 @@ public class ProfileController : ControllerBase
                            where u.User_id == Userid
                            select c).Count();
 
-        var result = new { learntCourse = learntCourse, uppedCourse = uppedCourse };
+        var result = new
+        {
+            status = 200,
+            learntCourse = learntCourse,
+            uppedCourse = uppedCourse
+        };
         return new JsonResult(result);
     }
 
@@ -85,7 +103,12 @@ public class ProfileController : ControllerBase
                      where c.Course_id == Courseid
                      select u; //id, fullname
 
-        return new JsonResult(author);
+        var result = new
+        {
+            status = 200,
+            author = author,
+        };
+        return new JsonResult(result);
     }
 
 }
