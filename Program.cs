@@ -8,8 +8,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
-            });;
-
+            }); ;
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +27,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "/{controller}/{action}");
 
-app.MapFallbackToFile("index.html");;
+app.MapFallbackToFile("index.html");
 
 app.Run();
