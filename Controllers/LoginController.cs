@@ -18,42 +18,49 @@ public class LoginController : ControllerBase
     }
 
 
-    [Route("sign-up"), HttpPost]
-    public JsonResult SignUp()
-    {
-        var reader = new StreamReader(HttpContext.Request.Body);
-        var body = reader.ReadToEnd();
-        dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
+    // [Route("api/sign-up"), HttpPost]
+    // public JsonResult SignUp()
+    // {
+    //     var reader = new StreamReader(HttpContext.Request.Body);
+    //     var body = reader.ReadToEnd();
+    //     dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
 
-        var context = new DBContext();
-        string UserEmail = (string)data.email;
-        string Account = (string)data.username;
-        string Password = (string)data.password;
-        UserEmail = UserEmail != null ? UserEmail : string.Empty;
-        var emailExist = from user in context.users where user.Email == UserEmail select user;
-        var accountExist = from acc in context.accounts where acc.Username == Account select acc;
-        if (emailExist != null && accountExist != null)
-        {
-            User u = new User();
-            u.Fullname = Account;
-            u.Email = UserEmail;
-            context.users.Add(u);
-            context.SaveChanges();
-            context.Entry(u).GetDatabaseValues();
+    //     var context = new DBContext();
+    //     string UserEmail = (string)data.email;
+    //     UserEmail = UserEmail != null ? UserEmail : string.Empty;
+    //     var emailExist = from user in context where user.Email == UserEmail select user;
+    //     return new JsonResult(emailExist.FirstOrDefault());
+    // }
 
-            Account acc = new Account();
-            acc.Username = Account;
-            // acc.Pwd = bcrypt(Password);
-            acc.User_id = u.User_id;
-            context.accounts.Add(acc);
-            context.SaveChanges();
+    //     var context = new DBContext();
+    //     string UserEmail = (string)data.email;
+    //     string Account = (string)data.username;
+    //     string Password = (string)data.password;
+    //     UserEmail = UserEmail != null ? UserEmail : string.Empty;
+    //     var emailExist = from user in context.users where user.Email == UserEmail select user;
+    //     var accountExist = from acc in context.accounts where acc.Username == Account select acc;
+    //     if (emailExist != null && accountExist != null)
+    //     {
+    //         User u = new User();
+    //         u.Fullname = Account;
+    //         u.Email = UserEmail;
+    //         context.users.Add(u);
+    //         context.SaveChanges();
+    //         context.Entry(u).GetDatabaseValues();
 
-            return new JsonResult(u);
+    //         Account acc = new Account();
+    //         acc.Username = Account;
+    //         // acc.Pwd = bcrypt(Password);
+    //         acc.User_id = u.User_id;
+    //         context.accounts.Add(acc);
+    //         context.SaveChanges();
+
+    //         return new JsonResult(u);
 
 
-        }
-        return new JsonResult(emailExist.FirstOrDefault());
-    }
+    //     }
+    //     return new JsonResult(emailExist.FirstOrDefault());
+    // }
     [Route("sign-ups"), HttpPost]
     public JsonResult GetCurrentUser()
     {

@@ -144,7 +144,7 @@ export function ProfileHeader({ User }) {
     });
 
     useEffect(() => {
-        axios.get('/api/get-city').then(res => {
+        axios.get('https://localhost:7074/Profile/get-city').then(res => {
             //console.log(res);
             if (res.data.status === 200) {
                 setCity({

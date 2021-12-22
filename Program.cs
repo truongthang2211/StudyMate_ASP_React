@@ -8,8 +8,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
-            });;
-
+            }); ;
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
