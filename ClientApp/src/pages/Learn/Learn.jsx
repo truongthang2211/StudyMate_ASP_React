@@ -1,24 +1,21 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import axios from 'axios';
 import {
-    BrowserRouter as Router,
-    generatePath,
-    Switch,
-    Route,
-    useHistory,
     useParams,
-    useNavigate
+    useNavigate, Link
 } from "react-router-dom";
 import YouTube from 'react-youtube';
 import Collapsible from '../../components/Collapsible/Collapsible';
 import './Learn.css'
+import moment from 'moment';
+import My404 from '../My404/My404'
 import { ListCourse } from '../../Data.js'
 
 const ThisUserID = new URLSearchParams(document.cookie.replaceAll("; ", "&")).get('StudyMate');
-export default memo(function Learn({ LearnData, Admin }) {
+export default memo(function Learn({ LearnData, Admin ,User}) {
     const [pending, setPending] = useState(true);
     const { course, lesson } = useParams();
-    const { id, subid } = useParams();
+    const { feature, id, subid } = useParams();
     const [dataLearning, setData] = useState({});
     const [comments, setComments] = useState([]);
     const [videoid, setVideoID] = useState('');
@@ -54,6 +51,13 @@ export default memo(function Learn({ LearnData, Admin }) {
         var match = url.match(regExp);
         return (match && match[7].length == 11) ? match[7] : false;
     }
+    const msecToTime = ms => {
+        const seconds = Math.floor((ms / 1000) % 60)
+        const minutes = Math.floor((ms / (60 * 1000)) % 60)
+        const hours = Math.floor((ms / (3600 * 1000)) % 3600)
+        return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds
+            }`
+    }
     const navigate = useNavigate();
     useEffect(async () => {
         try {
@@ -61,24 +65,29 @@ export default memo(function Learn({ LearnData, Admin }) {
             const Tlesson = lesson ?? subid;
 
 
-            if (!LearnData && Tcourse) {
+            if (!LearnData) {
                 const res = await axios.get(`/api/get-learn/${Tcourse}/${Tlesson}`)
                 console.log(res)
+                if (res.data.status == 201) {
+                    navigate('/404')
+                }
                 if (!Admin) {
                     if (res.data.message.LastLessonLearnt == -1) {
                         navigate(`/learn/${Tcourse}/${res.data.message.ListLearn[0].Lesson[0].LESSON_ID}`)
-                    } else {
+                    } else if (!lesson) {
                         navigate(`/learn/${Tcourse}/${res.data.message.LastLessonLearnt + 1}`)
+                    } else {
+                        navigate(`/learn/${Tcourse}/${Tlesson}`)
                     }
                 } else {
-                    navigate(`/admin/course-manage/learn/${Tcourse}/${Tlesson}`)
+                    navigate(`/admin/${feature}/learn/${Tcourse}/${Tlesson}`)
 
                 }
 
                 setPending(false)
                 setData(res.data.message)
                 setVideoID(youtube_id(res.data.message.LearningURL))
-            } else if (LearnData) {
+            } else if (LearnData && LearnData.LearningURL) {
                 setPending(false)
                 setData(LearnData)
                 setVideoID(youtube_id(LearnData.LearningURL))
@@ -90,22 +99,25 @@ export default memo(function Learn({ LearnData, Admin }) {
         }
     }, [LearnData])
     const showComment = async () => {
-        try {
-            const res = await axios.post(`/api/get-comments`, { lesson_id: lesson });
-            console.log(res)
-            setComments(res.data.message)
-        } catch (error) {
-            console.log(error)
+        if (feature != 'approval') {
+            try {
+                const res = await axios.post(`/api/get-comments`, { lesson_id: lesson || subid });
+                console.log(res)
+                setComments(res.data.message)
+            } catch (error) {
+                console.log(error)
+            }
         }
+
     }
     useEffect(() => {
         showComment();
         // console.log('testest')
-    }, [lesson])
+    }, [lesson, subid])
     const handleLesson = (lesson_url, lesson_id, status) => {
         let url = '/learn/';
         if (Admin) {
-            url = '/admin/course-manage/learn/'
+            url = `/admin/${feature}/learn/`
         }
         if (status != 'block-item') {
             const Tcourse = course ?? id;
@@ -115,7 +127,7 @@ export default memo(function Learn({ LearnData, Admin }) {
     }
     let TimerId = 0;
     const handleVideoPlaying = async (e) => {
-        if (e.data == 1) {
+        if (e.data == 1 && !Admin && ThisUserID != dataLearning.Author) {
             TimerId = setInterval(() => {
                 if (e.target.getCurrentTime() / e.target.getDuration() > 0.8) {
                     if (dataLearning.LastLessonLearnt + 1 == lesson || dataLearning.LastLessonLearnt == -1) {
@@ -135,13 +147,14 @@ export default memo(function Learn({ LearnData, Admin }) {
             clearInterval(TimerId)
         }
     }
+    var status = '';
     return (!pending && <>
 
         <div id="left-learning">
             <div className="breadcrumb">
-                <a className="breadcrumb-item" href="/"><i className="fas fa-home"></i></a>
-                <a className="breadcrumb-item" href="/learn">Khóa học</a>
-                <a className="breadcrumb-item" href="/learn/lap-trinh-7">Lập trình</a>
+                <Link className="breadcrumb-item" to="/"><i className="fas fa-home"></i></Link>
+                <Link className="breadcrumb-item" to={`/list-course/${dataLearning.CourseMainType && dataLearning.CourseMainType.COURSE_MAINTYPE_ID}`}>{dataLearning.CourseMainType && dataLearning.CourseMainType.TYPE_NAME}</Link>
+                <Link className="breadcrumb-item" to={`/list-course/null/${dataLearning.CourseType && dataLearning.CourseType.COURSE_SUBTYPE_ID}`}>{dataLearning.CourseType && dataLearning.CourseType.TYPE_NAME}</Link>
                 <span className="breadcrumb-item active">{dataLearning.CourseTitle}</span>
             </div>
             <div className="video-learning">
@@ -152,28 +165,27 @@ export default memo(function Learn({ LearnData, Admin }) {
                     <div className="info-learning-content">
                         <div className="tabs-bar">
                             <div className="tab-item selected-tab">Trao đổi</div>
-                            <div className="tab-item">Bài giảng</div>
-                            <div className="tab-item">File đính kèm</div>
+
                         </div>
                         <div className="info-learning-comment">
-                            <UserComment updateComment={showComment} />
+                            <UserComment User={User} updateComment={showComment} />
                             <div className="person-comment-block">
                                 <ul>
                                     {comments.map((item, index) => {
                                         return (
                                             <li key={index}>
                                                 <Comment key={index} User={item.User} index={index} Content={item.Content}
-                                                    parentComment={item.commentID} UsersVoted={item.UsersVoted}
+                                                    parentComment={item.commentID} UsersVoted={item.UsersVoted} Time={item.CommentTime}
                                                     Upvote={item.UpVote} Downvote={item.DownVote} handleRepl={onClickRepl}
                                                     commentID={item.commentID} updateComment={showComment} />
                                                 {item.SubComments.map((item2, index2) => {
                                                     if (item2.thisuser) {
-                                                        return (<UserComment key={index2} parent_index={index} updateComment={showComment}
+                                                        return (<UserComment key={index2} parent_index={index} updateComment={showComment} User={User}
                                                             index={index2} repl parentComment={item2.parent_comment} handleCancel={onClickCancel} />);
                                                     } else {
                                                         return (
                                                             <Comment parent_index={index} index={index2} key={index2} parentComment={item.commentID}
-                                                                UsersVoted={item2.UsersVoted} updateComment={showComment}
+                                                                UsersVoted={item2.UsersVoted} updateComment={showComment} Time={item.CommentTime}
                                                                 repl User={item2.User} Content={item2.Content} handleRepl={onClickRepl}
                                                                 commentID={item2.commentID} />
                                                         );
@@ -192,41 +204,31 @@ export default memo(function Learn({ LearnData, Admin }) {
 
         </div>
         <div id="right-learning">
-            <header className="playlist-header" style={{ '--process': "67%" }}>
-                <div className="background-process">
-                </div>
-                <div className="playlist-header-content">
-                    <h1 className="playlist-title">{dataLearning.CourseTitle}</h1>
-                    <div className="playlist-info">
-                        <p className="playlist-description">
-                            Hoàn thành
-                            <strong>76</strong>/<strong>113</strong>
-                            bài học (<strong>67%</strong>)
-                        </p>
-                    </div>
-                </div>
-            </header>
+            <RightHeader learnt={dataLearning.ListLearn && dataLearning.ListLearn.reduce((a, b) => a + b.Lesson.filter(e => e.LESSON_ID <= dataLearning.LastLessonLearnt).length, 0)}
+                totalLesson={dataLearning.ListLearn && dataLearning.ListLearn.reduce((a, b) => a + b.Lesson.length, 0)}
+                title={dataLearning.ListLearn && dataLearning.CourseTitle} />
             {dataLearning.ListLearn && dataLearning.ListLearn.map((item, index) => {
                 return (
                     <Collapsible className="playlist-wrapper" key={index}>
-                        <Chapter title={item.ChapterTitle} />
+                        <Chapter learnt={item.Lesson.filter(e => e.LESSON_ID <= dataLearning.LastLessonLearnt).length}
+                            title={item.ChapterTitle} totalLesson={item.Lesson.length} Duration={msecToTime(item.Lesson.reduce((a, b) => a + b.DURATION, 0))} />
                         <div className="playlist-wrapper-list">
-                            {item.Lesson.map((less, index2) => {
-                                const status = '';
-                                if (less.LESSON_ID == dataLearning.LastLessonLearnt + 1 || (dataLearning.LastLessonLearnt == -1 && less.LESSON_ID == lesson) || dataLearning.Author == ThisUserID || Admin) {
-                                    status = 'normal-item'
-                                } else if (less.LESSON_ID < dataLearning.LastLessonLearnt + 1) {
-                                    status = 'learnt-item'
-                                } else if (less.LESSON_ID > dataLearning.LastLessonLearnt + 1) {
-                                    status = 'block-item'
-                                }
-                                if (less.LESSON_ID == lesson || less.LESSON_ID == subid) {
-                                    status += ' learning-item'
-                                }
-                                return (
-                                    <Lession status={status} handleLesson={handleLesson} lesson_id={less.LESSON_ID} videoURL={less.LESSON_URL} key={index2} title={less.LESSON_NAME} duration={less.DURATION} />
-                                );
-                            })}
+                            {
+                                item.Lesson.map((less, index2) => {
+                                    if (less.LESSON_ID == dataLearning.LastLessonLearnt + 1 || (dataLearning.LastLessonLearnt == -1 && less.LESSON_ID == lesson) || dataLearning.Author == ThisUserID || Admin) {
+                                        status = 'normal-item'
+                                    } else if (less.LESSON_ID < dataLearning.LastLessonLearnt + 1) {
+                                        status = 'learnt-item'
+                                    } else if (less.LESSON_ID > dataLearning.LastLessonLearnt + 1) {
+                                        status = 'block-item'
+                                    }
+                                    if ((!Admin && less.LESSON_ID == lesson) || less.LESSON_ID == subid || subid == index2) {
+                                        status += ' learning-item'
+                                    }
+                                    return (
+                                        <Lession status={status} handleLesson={handleLesson} lesson_id={less.LESSON_ID ?? index2} videoURL={less.LESSON_URL} key={index2} title={less.LESSON_NAME} duration={msecToTime(less.DURATION)} />
+                                    );
+                                })}
                         </div>
                     </Collapsible>
                 );
@@ -282,7 +284,7 @@ function UserComment(props) {
         <div id="user-comment-block">
             <div className={ClassName}>
                 <div className="comment-avt">
-                    <img className="CommentBox_myAvatar__3Mi09" src="https://scontent.fsgn5-11.fna.fbcdn.net/v/t1.6435-9/123519836_2709233069342309_404418965952590855_n.jpg?_nc_cat=111&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=i1SBPX81GKUAX_deJFe&_nc_ht=scontent.fsgn5-11.fna&oh=d685f02a12ebb0131217f4705e5c5795&oe=61C416A0" alt="Thang Nguyen" />
+                    <img className="CommentBox_myAvatar__3Mi09" src={props.User && props.User.AVATAR_IMG ? `/${props.User.AVATAR_IMG}` : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} alt="Thang Nguyen" />
                 </div>
                 <div className="comment-content align-items-end">
                     <textarea ref={commentRef} className="comment-input" autoFocus
@@ -387,17 +389,17 @@ function Comment(props) {
                         </span>
                     </span>
                     <span onClick={() => { props.handleRepl(props.index, props.parent_index, props.repl, props.parentComment) }} className="comment-repl" href="">Trả lời</span>
-                    <span className="comment-datetime">{props.Time}</span>
+                    <span className="comment-datetime">{moment(props.Time, "YYYY-MM-DD HH:mm:ss").fromNow()}</span>
                 </div>
             </div>
         </div>
     );
 }
-function Chapter({ title }) {
+function Chapter(props) {
     return (
         <div className="playplist-wrapper-header">
-            <h2 className="wrapper-header-title">{title}</h2>
-            <p className="wrapper-header-detail">2/2 | 05:44</p>
+            <h2 className="wrapper-header-title">{props.title}</h2>
+            <p className="wrapper-header-detail">{props.learnt}/{props.totalLesson} | {props.Duration}</p>
         </div>
     );
 }
@@ -418,5 +420,23 @@ function Lession({ title, duration, handleLesson, videoURL, lesson_id, status })
                 </div>
             </div>
         </div>
+    );
+}
+function RightHeader(props) {
+    return (
+        <header className="playlist-header" style={{ '--process': (props.learnt / props.totalLesson * 100).toFixed(2) + '%' }}>
+            <div className="background-process">
+            </div>
+            <div className="playlist-header-content">
+                <h1 className="playlist-title">{props.title}</h1>
+                <div className="playlist-info">
+                    <p className="playlist-description">
+                        Hoàn thành
+                        <strong> {props.learnt}</strong>/<strong>{props.totalLesson} </strong>
+                        bài học (<strong>{(props.learnt / props.totalLesson * 100).toFixed(2)} %</strong>)
+                    </p>
+                </div>
+            </div>
+        </header>
     );
 }

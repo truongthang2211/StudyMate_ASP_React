@@ -31,7 +31,7 @@ public class CourseController : ControllerBase
                     'Comedy'
                 ]
                 }"; 
-        var test = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
+        var test = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(json);
         return new JsonResult(test);
     }
 }

@@ -21,7 +21,7 @@ const CreateData = {
     ListOut: [],
     AutoTitle: true,
     AutoCreateList: false,
-    Commisstion: 70,
+    Commission: 20,
     ListCourse: [],
     Author: -1,
     Created_at: moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -30,7 +30,7 @@ const CreateData = {
 
 
 let fd;
-export default function CreateCourse({ User, CourseData, Admin, Edit }) {
+export default function CreateCourse({ User, CourseData, Admin }) {
     const nav = useNavigate();
     const [Data, setData] = useState(CourseData ?? CreateData);
     useEffect(() => {
@@ -91,13 +91,7 @@ export default function CreateCourse({ User, CourseData, Admin, Edit }) {
         var match = url.match(regExp);
         return (match && match[7].length == 11) ? match[7] : false;
     }
-    const msecToTime = ms => {
-        const seconds = Math.floor((ms / 1000) % 60)
-        const minutes = Math.floor((ms / (60 * 1000)) % 60)
-        const hours = Math.floor((ms / (3600 * 1000)) % 3600)
-        return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds
-            }`
-    }
+
     const handleSubmit = async () => {
         if (Data.ListCourse.length < 1 || Data.ListCourse[0].type != 'chapter') {
             Swal.fire({
@@ -107,49 +101,67 @@ export default function CreateCourse({ User, CourseData, Admin, Edit }) {
             })
             return;
         }
-        const newListCourse = [];
-        for (var i = 0; i < Data.ListCourse.length; ++i) {
-            if (Data.ListCourse[i].type == 'chapter') {
-                newListCourse.push({ title: Data.ListCourse[i].title, lesson: [], id: Data.ListCourse[i].id ?? null })
-            } else {
-                let duration = '';
-                let youtb_id = youtube_id(Data.ListCourse[i].URL);
-                await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&id=${youtb_id}&key=${API_KEY}`)
-                    .then(data => data.json()).then(data => {
-                        console.log(data)
-                        duration = (moment.duration(data.items[0].contentDetails.duration).asMilliseconds())
+        Swal.fire({
+            title: 'Bạn có chắc muốn ' + Data.ActionType.toLowerCase() + ' khóa học?',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            showLoaderOnConfirm: true,
+            icon: "question",
+            preConfirm: async () => {
+                const newListCourse = [];
+                for (var i = 0; i < Data.ListCourse.length; ++i) {
+                    if (Data.ListCourse[i].type == 'chapter') {
+                        newListCourse.push({ title: Data.ListCourse[i].title, lesson: [], id: Data.ListCourse[i].id ?? null })
+                    } else {
+                        let duration = '';
+                        let youtb_id = youtube_id(Data.ListCourse[i].URL);
+                        await fetch(`https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&id=${youtb_id}&key=${API_KEY}`)
+                            .then(data => data.json()).then(data => {
+                                console.log(data)
+                                duration = (moment.duration(data.items[0].contentDetails.duration).asMilliseconds())
 
+                            })
+                        newListCourse.at(-1).lesson = [
+                            ...newListCourse.at(-1).lesson,
+                            {
+                                id: Data.ListCourse[i].id ?? null,
+                                title: Data.ListCourse[i].title,
+                                url: Data.ListCourse[i].URL,
+                                duration: duration
+                            }]
+                    }
+                }
+                const newData = { ...Data, ListCourse: newListCourse }
+                console.log(newData)
+                fd.append('data', JSON.stringify(newData))
+                const url = Admin ? "/api/update-course" : "/api/create-course-approval"
+                return axios.post(url, fd, { "enctype": "multipart/form-data" })
+                    .then(async (res) => {
+                        console.log(res)
+                        if (res.data.status == 200) {
+                            await Swal.fire({
+                                text: res.data.message,
+                                icon: 'success',
+                                confirmButtonText: 'Hay'
+                            })
+                            nav("/");
+                        } else {
+                            await Swal.fire({
+                                text: res.data.message,
+                                icon: 'error',
+                                confirmButtonText: 'Hay'
+                            })
+                        }
                     })
-                newListCourse.at(-1).lesson = [
-                    ...newListCourse.at(-1).lesson,
-                    {
-                        id: Data.ListCourse[i].id ?? null,
-                        title: Data.ListCourse[i].title,
-                        url: Data.ListCourse[i].URL,
-                        duration: duration
-                    }]
-            }
-        }
-        const newData = { ...Data, ListCourse: newListCourse }
-        console.log(newData)
-        fd.append('data', JSON.stringify(newData))
-        const url = Admin || Edit ? "/api/update-course" : "/api/create-course-approval"
-        const res = await axios.post(url, fd, { "enctype": "multipart/form-data" })
-        console.log(res)
-        if (res.data.status == 200) {
-            await Swal.fire({
-                text: res.data.message,
-                icon: 'success',
-                confirmButtonText: 'Hay'
-            })
-            nav("/");
-        } else {
-            await Swal.fire({
-                text: res.data.message,
-                icon: 'error',
-                confirmButtonText: 'Hay'
-            })
-        }
+                    .catch(error => {
+                        Swal.showValidationMessage(
+                            `Request failed: ${error}`
+                        )
+                    })
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        })
+
 
 
     }
@@ -157,14 +169,13 @@ export default function CreateCourse({ User, CourseData, Admin, Edit }) {
         <div className="container">
             <form id="create-course-form" className="create-course-form">
                 <h2 className="create-course-title">Tạo khóa học</h2>
-                {Page === 1 && <PageOne Data={Data} handleOnchange={handleOnchange} />}
+                {Page === 1 && <PageOne Data={Data} Admin={Admin} handleOnchange={handleOnchange} />}
                 {Page === 2 && <PageTwo Data={Data} handleOnchange={handleOnchange} />}
                 {Page === 3 && <PageThree Data={Data} handleOnchange={handleOnchange} />}
                 {Page === 4 && <PageFour Data={Data} handleOnchange={handleOnchange} />}
                 <div>
                     <a onClick={handlePrevious} className={Page === 1 ? buttonClassName + " disabled" : buttonClassName}>Lùi lại</a>
                     <a onClick={Page === 4 ? handleSubmit : handleNextPage} className={CheckInput() ? buttonClassName : buttonClassName + " disabled"}>{Page === 4 ? "Xác nhận" : "Tiếp theo"}</a>
-                    {!Admin && <a onClick={handleNextPage} className="btn my-custom-button-default my-custom-button-simple">Lưu tạm</a>}
                 </div>
             </form>
 
@@ -181,7 +192,6 @@ function PageOne(props) {
         return []
     });
     useEffect(() => {
-        console.log('???')
         if (ListCategory[props.Data.Category - 1111]) {
             setSubList(ListCategory[props.Data.Category - 1111].subCatogory)
         }
@@ -195,7 +205,7 @@ function PageOne(props) {
         props.handleOnchange([['SubCategory', id]])
     }
     function formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+\b)/g, ",")
+        return num?num.toString().replace(/\B(?=(\d{3})+\b)/g, ","):"0";
     }
     const onPriceChange = (e) => {
         if (/[a-zA-Z]/.test(e.target.value.toString())) {
@@ -208,13 +218,23 @@ function PageOne(props) {
         }
         props.handleOnchange([['Price', SoTien]])
     }
-
+    const onCommissionChange = (e) => {
+        if (/[a-zA-Z]/.test(e.target.value.toString())) {
+            return;
+        }
+        e.target.value = e.target.value == '' ? '0' : e.target.value;
+        let HoaHong = parseInt(e.target.value.replace(/,/g, ""))
+        if (HoaHong > 100) {
+            HoaHong = 100
+        }
+        props.handleOnchange([['Commission', HoaHong]])
+    }
     return (
         <div className="page-one-form">
             <div className="page-one-input">
                 <div className="create-course-input-item">
                     <div className="input-field">
-                        <input autoFocus type="text" name="CourseTitle" value={props.Data.CourseTitle} onChange={(e) => props.handleOnchange([[e.target.name, e.target.value]])} className="create-course-form-input" placeholder=" " />
+                        <input autoFocus type="text" name="CourseTitle" value={props.Data.CourseTitle || ''} onChange={(e) => props.handleOnchange([[e.target.name, e.target.value]])} className="create-course-form-input" placeholder=" " />
                         <label htmlFor="title" className="create-course-form-label">Tên khóa học</label>
                     </div>
                 </div>
@@ -224,6 +244,12 @@ function PageOne(props) {
                         <label htmlFor="title" className="create-course-form-label">Giá bán</label>
                     </div>
                 </div>
+                {props.Admin&&<div className="create-course-input-item">
+                    <div className="input-field">
+                        <input type="text" name="Commission" value={formatNumber(props.Data.Commission)} onChange={(e) => onCommissionChange(e)} className="create-course-form-input" placeholder=" " />
+                        <label htmlFor="title" className="create-course-form-label">Hoa hồng</label>
+                    </div>
+                </div>}
                 <div className="create-course-input-item">
                     <div className="input-field input-desc">
                         <textarea type="text" name="Description" value={props.Data.Description} onChange={(e) => props.handleOnchange([[e.target.name, e.target.value]])} className="create-course-form-input course-form-area" placeholder=" " />
@@ -568,7 +594,7 @@ function PageFour(props) {
                                                     <input className="text-input-simple mw-100 border-0 h6" placeholder="Tiêu đề của bài học" type="text" name="title" value={data.title} onChange={(e) => OnChangeHandle(e, index)} />
                                                     <br />
                                                     <input className="text-input-simple mw-100 border-0" placeholder="URL của bài học" type="text" name="URL" value={data.URL} onChange={(e) => OnChangeHandle(e, index)} />
-                                                    {!data.id && <i onClick={() => DeleteHandle(index)} className="fas fa-trash"></i>}
+                                                    {(!data.id )&& <i onClick={() => DeleteHandle(index)} className="fas fa-trash"></i>}
                                                 </div>
                                             )}
 

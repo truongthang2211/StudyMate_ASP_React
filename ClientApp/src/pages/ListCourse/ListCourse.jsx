@@ -12,26 +12,24 @@ function ListCourse() {
     const [courses, setCourses] = useState([]);
 
     useEffect(async () => {
+        var url = '/api/get-courses-by-subtype'
+        var postData = subtypeId;
+        if (subtypeId === 'null') {
+            url = '/api/get-courses-by-maintype'
+            postData = maintypeId
+        }
         try {
-            if (subtypeId === 'null') {
-                const resCourses = await axios.post('/api/get-courses-by-maintype', { maintypeId });
-                setCourses(resCourses.data.message);
-                console.log(resCourses);
-            } else {
-                const resCourses = await axios.post('/api/get-courses-by-subtype', { subtypeId });
-                setCourses(resCourses.data.message);
-                console.log(resCourses);
-            }
-
+            const resCourses = await axios.post(url, { postData });
+            setCourses(resCourses.data.message);
+            console.log(resCourses);
         } catch (error) {
             console.log(error);
         }
     }, [maintypeId, subtypeId]);
 
-
     return (
         <>
-            <div id="header" style={{ backgroundImage: "url('/img/courses/header-img.png')" }}>
+            {/* <div id="header" style={{ backgroundImage: "url('/img/courses/header-img.png')" }}>
                 <div className="container" >
                     <h2>Learning online. Let's start your knowledge journey!</h2>
                     <div id="search">
@@ -45,7 +43,7 @@ function ListCourse() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
             <div className="slider container">
                 <div className="row">
                     <div className="col-lg-3 menu-left-new">
@@ -395,7 +393,7 @@ function ListCourse() {
                         </ul>
                     </div>
                     <div className="col-lg-9 banner-right-new">
-                        <img src="https://i.ytimg.com/vi/8xLEec2NiV8/maxresdefault.jpg" alt="" />
+                        <img src="\img\courses\5417525.jpg" alt="" />
                     </div>
                 </div>
             </div>
@@ -406,12 +404,15 @@ function ListCourse() {
                         {courses && courses.map((course, index) =>
                             <HomeCourseItem
                                 key={index}
-                                desc={course.course_desc}
-                                title={course.course_name}
-                                author={course.fullname}
-                                img={course.img}
-                                fee={course.fee}
-                                courseId={course.course_id}
+                                desc={course.course.course_desc}
+                                title={course.course.course_name}
+                                author={course.course.fullname}
+                                img={course.course.img}
+                                fee={course.course.fee}
+                                courseId={course.course.course_id}
+                                upVote={course.upVote[0].numOfUpvote}
+                                downVote={course.downVote[0].numOfDownvote}
+                                author_id={course.course.author_id}
                             />
                         )}
                     </div>
