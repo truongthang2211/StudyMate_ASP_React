@@ -3,12 +3,20 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
             }); ;
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy( MyAllowSpecificOrigins,
+                      builder =>
+                      {
+                          builder.WithOrigins("https://localhost:44481").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                      });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,5 +36,5 @@ app.MapControllerRoute(
     pattern: "/{controller}/{action}");
 
 app.MapFallbackToFile("index.html");
-
+app.UseCors(MyAllowSpecificOrigins);
 app.Run();

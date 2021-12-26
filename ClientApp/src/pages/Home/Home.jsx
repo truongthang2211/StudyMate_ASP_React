@@ -8,14 +8,14 @@ import Footer from '../../components/Footer';
 function Home() {
     const [data, setData] = useState([]);
     useEffect(async () => {
-        const resData = await axios.get('/api/get-courses');
-        setData(resData.data.message);
+        const resData = await axios.get('https://localhost:7074/Course/get-courses');
         console.log(resData);
+        setData(resData.data.message);
     }, []);
 
     const [courses, setCourses] = useState({});
     useEffect(async () => {
-        const resCourses = await axios.get('/api/get-courses-homepage');
+        const resCourses = await axios.get('https://localhost:7074/Course/get-courses-homepage');
         setCourses(resCourses.data.message);
         console.log(resCourses);
     }, [])
@@ -24,12 +24,6 @@ function Home() {
 
     return (
         <>
-            {/* <div id="header" style={{ backgroundImage: "url('img/courses/header-img.png')" }}>
-                <div className="container" >
-                    <h2>Hãy bắt đầu hành trình học tập online của bạn từ hôm nay !</h2>
-
-                </div>
-            </div> */}
             <div className="slider container">
                 <div className="row">
                     <div className="col-lg-3 menu-left-new">
@@ -396,8 +390,8 @@ function Home() {
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
-                                upVote={course.upVote[0].numOfUpvote}
-                                downVote={course.downVote[0].numOfDownvote}
+                                upVote={course.upVote}
+                                downVote={course.downVote}
                                 author_id={course.course.author_id}
                             />
                         )}
@@ -406,7 +400,7 @@ function Home() {
                 <div className="content-section">
                     <h2 className="section-heading">{courseTypes[1]}</h2>
                     <div className="section-courses">
-                        {courses.TinHocVanPhong && courses.TinHocVanPhong.map((course, index) =>
+                        {courses.tinhocvanphong && courses.tinhocvanphong.map((course, index) =>
                             <HomeCourseItem
                                 key={index}
                                 desc={course.course.course_desc}
@@ -415,8 +409,8 @@ function Home() {
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
-                                upVote={course.upVote[0].numOfUpvote}
-                                downVote={course.downVote[0].numOfDownvote}
+                                upVote={course.upVote}
+                                downVote={course.downVote}
                                 author_id={course.course.author_id}
                             />
                         )}
@@ -425,7 +419,7 @@ function Home() {
                 <div className="content-section">
                     <h2 className="section-heading">{courseTypes[2]}</h2>
                     <div className="section-courses">
-                        {courses.CNTT && courses.CNTT.map((course, index) =>
+                        {courses.cntt && courses.cntt.map((course, index) =>
                             <HomeCourseItem
                                 key={index}
                                 desc={course.course.course_desc}
@@ -434,8 +428,8 @@ function Home() {
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
-                                upVote={course.upVote[0].numOfUpvote}
-                                downVote={course.downVote[0].numOfDownvote}
+                                upVote={course.upVote}
+                                downVote={course.downVote}
                                 author_id={course.course.author_id}
                             />
                         )}

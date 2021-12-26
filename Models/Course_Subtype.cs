@@ -8,7 +8,7 @@ namespace StudyMate_ASP_React.Models
     public class Course_Subtype
     {
         [Key]
-        public int Course_maintype_id { get; set; }
+        public int Course_subtype_id { get; set; }
         public string? Type_name { get; set; }
         public int Parent_type_id { get; set; }
     }
