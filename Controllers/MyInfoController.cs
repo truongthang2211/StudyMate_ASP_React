@@ -25,6 +25,14 @@ public class MyInfoController : ControllerBase
                     where u.Email == Email
                     select u).FirstOrDefault();
 
+        user.Fullname = (string)data.Fullname;
+        user.Date_of_birth = (string)data.Date_of_birth;
+        user.City_id = (string)data.City_id;
+        user.Phone = (int)data.Phone;
+        user.School = (string)data.School;
+        user.Facebook = (string)data.Facebook;
+        user.Bio = (string)data.Bio;
+
         context.Update(user);
         context.SaveChanges();
 
