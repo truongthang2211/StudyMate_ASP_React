@@ -23,7 +23,7 @@ function LoginForm({ handleShowForm, setUser }) {
     console.log('render login-form')
     const handleSubmit = async (e) => {
         e.preventDefault();
-        axios.post('/api/sign-in', state)
+        axios.post('https://localhost:7074/Login/sign-in', state)
             .then(function (response) {
                 if (response.data.status == 200) {
                     window.location.reload();

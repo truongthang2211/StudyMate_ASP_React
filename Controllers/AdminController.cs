@@ -10,7 +10,13 @@ namespace StudyMate_ASP_React.Controllers;
 [Route("[controller]")]
 public class AdminController : ControllerBase
 {
-
+    [Route("em-dep-lam"), HttpGet]
+    public JsonResult CourseList()
+    {
+        var context = new DBContext();
+        var products = context.Database.ExecuteSqlRawAsync("SELECT * FROM COURSES");
+        return new JsonResult(products);
+    }
 
     
     

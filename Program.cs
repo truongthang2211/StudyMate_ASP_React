@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using StudyMate_ASP_React.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped(sp => ActivatorUtilities.CreateInstance<DBContext>(sp));
 
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<KestrelServerOptions>(options =>

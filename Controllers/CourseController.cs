@@ -11,11 +11,12 @@ namespace StudyMate_ASP_React.Controllers;
 public class CourseController : ControllerBase
 {
 
+    
     [Route("em-dep-lam"), HttpGet]
     public JsonResult Get()
     {
         var context = new DBContext();
-        var products = from p in context.courses select p;
+        var products = context.Database.ExecuteSqlRawAsync("SELECT * FROM COURSES");
         return new JsonResult(products);
     }
     [Route("em-dep-lam"), HttpPost]
@@ -30,7 +31,7 @@ public class CourseController : ControllerBase
                     'Action',
                     'Comedy'
                 ]
-                }"; 
+                }";
         var test = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(json);
         return new JsonResult(test);
     }

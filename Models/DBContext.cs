@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StudyMate_ASP_React.Models
 {
+    [ActivatorUtilitiesConstructor]
     public class DBContext : DbContext
     {
         // Chuỗi kết nối tới CSDL (MS SQL Server)
