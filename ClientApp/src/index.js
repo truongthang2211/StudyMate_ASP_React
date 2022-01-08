@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import { BrowserRouter, Routes, Route, Link, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 
 import Navbar from './components/Navigation/Navbar';
 import Profile from './pages/Profile/Profile';
@@ -16,7 +16,7 @@ import CourseManage from './pages/CourseManage/CourseManage';
 import Admin from './pages/Admin/Admin';
 import ListCourse from './pages/ListCourse/ListCourse';
 import Search from './pages/Search/Search';
-
+axios.defaults.withCredentials = true
 function Index() {
     const [ShowForm, setShowForm] = useState(false)
     const [User, setUser] = useState(() => {
@@ -31,7 +31,7 @@ function Index() {
 
     }, [])
     const LoadUser = async () => {
-        const res = await axios.get('/get-user')
+        const res = await axios.get('https://localhost:7074/Login/get-user',{ withCredentials: true })
         console.log(res);
         if (res.data.user) {
             setUser({ ...res.data.user, loading: false });

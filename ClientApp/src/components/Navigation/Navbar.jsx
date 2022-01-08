@@ -1,11 +1,17 @@
-import { React, useEffect } from 'react';
+import { React, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSpring, animated, styled } from 'react-spring'
 import './Navbar.css'
 import LoginForm from '../../components/LoginForm';
 import axios from 'axios';
+import moment from 'moment';
+import { useNavigate } from "react-router-dom";
+function formatNumber(num) {
+  return num.toString().replace(/\B(?=(\d{3})+\b)/g, ",")
+}
+moment.locale('vi');
 function Navbar({ ShowForm, handleShowForm, User }) {
- 
+  const nav = useNavigate();
   const animation = useSpring({
     config: {
       duration: 200
@@ -13,12 +19,13 @@ function Navbar({ ShowForm, handleShowForm, User }) {
     opacity: ShowForm ? 1 : 0
 
   })
-  const handleLogout = () =>{
-    axios.get('/api/sign-out').then(()=>{
+  const handleLogout = () => {
+    axios.get('https://localhost:7074/Login/sign-out').then(() => {
       window.location.reload();
     })
   }
   useEffect(() => {
+
     const Menu_bar = document.getElementById('Menu-btn');
     const Menu_box = document.getElementById('navbarNav');
     const Mask = document.getElementById('mask')
@@ -39,7 +46,30 @@ function Navbar({ ShowForm, handleShowForm, User }) {
       Mask.style.visibility = 'hidden';
     }
   }, [])
+  const [noti, setNoti] = useState()
+  const updateNoti = async () => {
+    const res = await axios.get('https://localhost:7074/Login/get-noti');
+    console.log(res)
+    setNoti(res.data.message);
+  }
+  const ReadNoti = async () => {
+    if (noti.filter(e => e.read_state == 0).length > 0) {
+      const res = await axios.get('https://localhost:7074/Login/read-noti');
+      console.log(res)
+      if (res.data.status == 200) {
+        updateNoti();
+      }
+    }
 
+  }
+  useEffect(() => {
+    updateNoti();
+  }, [])
+  const [searchData,setSearchData] = useState('');
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    nav(`/search/${searchData}`)
+  }
   return (
     <>
       {ShowForm &&
@@ -55,20 +85,17 @@ function Navbar({ ShowForm, handleShowForm, User }) {
           <div id="mask"></div>
 
           <div className="navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav">
-              <li className="nav-item">
-                <a href="#" className="nav-link">Khóa học</a>
-              </li>
-              <li className="nav-item">
-                <a href="#" className="nav-link">Xếp hạng</a>
-              </li>
-              <li className="nav-item">
-                <a href="#" className="nav-link">FAQS</a>
-              </li>
-              <li className="nav-item">
-                <a href="#" className="nav-link">Tài trợ</a>
-              </li>
-            </ul>
+            <div id="search">
+              <div className="input-group">
+                <form action="" id="form-search" onSubmit={handleSearch}>
+                  <input value={searchData} name="search" id="search-course" className="form-control" 
+                  type="text" placeholder="Tìm kiếm khóa học ..." onChange={e=> setSearchData(e.target.value)}/>
+                  <span onClick={handleSearch} className="input-group-btn">
+                    <i className="fas fa-search"></i>
+                  </span>
+                </form>
+              </div>
+            </div>
           </div>
 
           <div className="navbar__user">
@@ -78,26 +105,17 @@ function Navbar({ ShowForm, handleShowForm, User }) {
             </>
             }
             {!User.loading && <>
-              <div className="navbar__user_notifi">
+              <div onClick={ReadNoti} className="navbar__user_notifi">
                 <i className="far fa-bell"></i>
-                <span className="noti-number">0</span>
+                {noti && noti.filter(e => e.read_state == 0).length>0&&<span className="noti-number">{noti && noti.filter(e => e.read_state == 0).length}</span>}
                 <div className="notifi-form dropdown-form">
                   <div className="notifi-header">
                     <h4>Thông báo</h4>
                   </div>
-                  <div className="norifi-content">
+                  <div className="notifi-content">
                     <div className="notification">
-                      <div className="notification__info">
-                        <a className="info_avatar">
-                          <img src="https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png" alt="" />
-                        </a>
-                        <div className="info">
-                          <p style={{ 'fontSize': '14px' }}>
-                            <a href="/user/profile/2" target="_blank">SW (Bá)</a> đã phản hồi bình luận của bạn trên
-                            <a href="/thread/request-update-don-t-starve-together-1195?commentId=11365#div-comment" target="_blank">[Request Update] Don't Starve Together</a></p>
-                          <p className="time">9 tháng trước</p>
-                        </div>
-                      </div></div>
+                      {noti && noti.map(e => <NotiItem key={e.noti_id} Time={e.created_at} Content={e.content} Read={e.read_state} />)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -106,12 +124,12 @@ function Navbar({ ShowForm, handleShowForm, User }) {
                   <img src={User.avatar || "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} alt="" />
                 </div>
                 <div className="navbar__user_info">
-                  <div className="user_info-name">{User.loading==true?"loading...":User.FULLNAME}</div>
-                  <div className="user_info-money">1.500 VND</div>
+                  <div className="user_info-name">{User.loading == true ? "loading..." : User.fullname}</div>
+                  <div className="user_info-money">{User.loading == true ? "loading..." : User.coin ? formatNumber(User.coin) : "0"} VND</div>
                 </div>
                 <ul className="dropdown-form dropdown-menu-user">
                   <li><Link to="/myinfo">Thông tin của tôi</Link></li>
-                  <li><Link to="/profile">Hồ sơ của tôi</Link></li>
+                  <li><Link to={"/profile/" + User.user_id}>Hồ sơ của tôi</Link></li>
                   <li><Link to="/course-manage/overview">Quản lý khóa học</Link></li>
                   <li><Link to="/create-course">Tạo khóa học</Link></li>
                   <li><a id="cick-logoff" onClick={handleLogout} href="#">Thoát</a></li>
@@ -133,3 +151,13 @@ function Navbar({ ShowForm, handleShowForm, User }) {
 }
 
 export default Navbar;
+function NotiItem(props) {
+  return (
+    <div className={`notification__info ${props.Read == 1 ? "read" : ""}`}>
+      <div className="info">
+        <p style={{ 'fontSize': '18px' }}>{props.Content || ''}</p>
+        <p className="time">{props.Time && moment(props.Time, "YYYY-MM-DD HH:mm:ss").fromNow()}</p>
+      </div>
+    </div>
+  )
+}

@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddScoped(sp => ActivatorUtilities.CreateInstance<DBContext>(sp));
 
-var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var MyAllowSpecificOrigins = "AllowSetOrigins";
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<KestrelServerOptions>(options =>
             {
@@ -14,12 +14,13 @@ builder.Services.Configure<KestrelServerOptions>(options =>
             }); ;
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy( MyAllowSpecificOrigins,
+    options.AddPolicy(MyAllowSpecificOrigins,
                       builder =>
                       {
-                          builder.WithOrigins("https://localhost:44481").AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                          builder.WithOrigins("https://localhost:44481").AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowedToAllowWildcardSubdomains();
                       });
 });
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,5 +40,5 @@ app.MapControllerRoute(
     pattern: "/{controller}/{action}");
 
 app.MapFallbackToFile("index.html");
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors();
 app.Run();

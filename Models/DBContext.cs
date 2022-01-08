@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 
 namespace StudyMate_ASP_React.Models
 {
@@ -11,6 +12,10 @@ namespace StudyMate_ASP_React.Models
 
         // Phương thức OnConfiguring gọi mỗi khi một đối tượng DbContext được tạo
         // Nạp chồng nó để thiết lập các cấu hình, như thiết lập chuỗi kết nối
+        public MySqlConnection GetConnection() //lấy connection 
+        {
+            return new MySqlConnection(connectionString);
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);

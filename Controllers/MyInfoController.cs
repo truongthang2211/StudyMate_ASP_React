@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ namespace StudyMate_ASP_React.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableCors("AllowSetOrigins")]
 public class MyInfoController : ControllerBase
 {
 

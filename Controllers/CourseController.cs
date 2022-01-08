@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using StudyMate_ASP_React.Models;
 using System.Collections;
+using Microsoft.AspNetCore.Cors;
 
 namespace StudyMate_ASP_React.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableCors("AllowSetOrigins")]
 public class CourseController : ControllerBase
 {
     [Route("get-upvote"), HttpGet]

@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using StudyMate_ASP_React.Models;
 
@@ -8,6 +10,7 @@ namespace StudyMate_ASP_React.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableCors("AllowSetOrigins")]
 public class LoginController : ControllerBase
 {
     private readonly IConfiguration _configuration;
@@ -95,32 +98,86 @@ public class LoginController : ControllerBase
         return new JsonResult(new
         {
             status = statuscode,
-            message = message
+            message = message,
+            id = ID.ToString()
         });
     }
+    [Route("sign-out"), HttpGet]
     public JsonResult SignOut()
     {
         if (Get("StudyMate") != null)
         {
             Remove("StudyMate");
         }
-         return new JsonResult(new
+        return new JsonResult(new
         {
             status = 200,
             message = "Sign out thanh cong"
         });
     }
-    public JsonResult GetCurrentUser(){
-        if (Get("CurrentUser") != null){
-            string id = Get("CurrentUser");
+
+    [Route("get-user"), HttpGet]
+    public object GetCurrentUser()
+    {
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
+        {
+            string id = HttpContext.Request.Cookies["StudyMate"];
             DBContext context = new DBContext();
-            var user = (from u in context.users where u.User_id.ToString()== id select u).FirstOrDefault();
-            return new JsonResult(new{ status=200,message="Lay User thanh cong",user=user});
-        }else{
-            return new JsonResult(new{ 
+            User user = (from u in context.users where u.User_id.ToString() == id select u).FirstOrDefault();
+            return (new { status = 200, message = "Lay User thanh cong", user = user });
+        }
+        else
+        {
+            return new JsonResult(new
+            {
                 status = 200,
                 message = "Cookies het han",
-                user = (User)null
+                users = HttpContext.Request.Cookies
+            });
+        }
+    }
+    [Route("get-noti"), HttpGet]
+    public object GetNotifications()
+    {
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
+        {
+            string id = HttpContext.Request.Cookies["StudyMate"];
+            DBContext context = new DBContext();
+           var notis = from n in context.notifications where n.User_id.ToString() == id orderby n.Noti_id descending select n;
+            return (new { status = 200, message = notis });
+        }
+        else
+        {
+            return new JsonResult(new
+            {
+                status = 200,
+                message = "Cookies het han",
+                users = HttpContext.Request.Cookies
+            });
+        }
+    }
+    [Route("read-noti"), HttpGet]
+    public object ReadNotifications()
+    {
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
+        {
+            string id = HttpContext.Request.Cookies["StudyMate"];
+            DBContext context = new DBContext();
+            MySqlConnection conn = context.GetConnection();
+            string strSQL = $"Update Notifications set read_state = 1 where user_id = {id}";
+            MySqlCommand cmd = new MySqlCommand(strSQL,conn);
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            return (new { status = 200, message = "update noti thanh cong" });
+        }
+        else
+        {
+            return new JsonResult(new
+            {
+                status = 200,
+                message = "Cookies het han",
+                users = HttpContext.Request.Cookies
             });
         }
     }
@@ -131,12 +188,9 @@ public class LoginController : ControllerBase
 
     public void Set(string key, string value, int? expireTime)
     {
-        CookieOptions option = new CookieOptions();
-        if (expireTime.HasValue)
-            option.Expires = DateTime.Now.AddMinutes(expireTime.Value);
-        else
-            option.Expires = DateTime.Now.AddMilliseconds(10);
-        Response.Cookies.Append(key, value, option);
+        CookieOptions cookieOptions = new CookieOptions();
+        cookieOptions.Expires = new DateTimeOffset(DateTime.Now.AddDays(7));
+        HttpContext.Response.Cookies.Append(key, value, cookieOptions);
     }
 
     public void Remove(string key)
