@@ -10,7 +10,7 @@ namespace StudyMate_ASP_React.Models
         [Key]
         public int User_id { get; set; }
         public int Course_id { get; set; }
-        public bool Course_review_state { get; set; }
+        public int Course_review_state { get; set; }
         public string? Content { get; set; }
     }
 }

@@ -164,7 +164,7 @@ export default function Course({ User, handleShowForm,callback }) {
     // GET COURSE DETAIL
     useEffect(async () => {
         try {
-            const resCourse = await axios.post('/api/get-course-detail', { courseId });
+            const resCourse = await axios.post('https://localhost:7074/Course/get-course-detail-by-id', { courseId });
             if (resCourse.data.course_general[0].author_id == user_id){
                 setCheckOwner(true);
             }
@@ -179,7 +179,7 @@ export default function Course({ User, handleShowForm,callback }) {
     // CHECK ENROLLED
     useEffect(async () => {
         try {
-            const resCheck = await axios.post('/api/check-enrolled', { courseId });
+            const resCheck = await axios.post('https://localhost:7074/Course/check-enrolled', { courseId });
             const flag = resCheck.data.message && resCheck.data.message.USER_ID == user_id && resCheck.data.message.COURSE_ID == courseId;
             setCheckEnrolled(flag);
             console.log(resCheck);
@@ -190,7 +190,7 @@ export default function Course({ User, handleShowForm,callback }) {
 
     const showReviews = async () => {
         try {
-            const res = await axios.post(`/api/get-reviews`, { course_id: courseId });
+            const res = await axios.post(`https://localhost:7074/Course/get-reviews`, { course_id: courseId });
             console.log(res)
             setReviews(res.data.message)
         } catch (error) {
@@ -257,7 +257,7 @@ export default function Course({ User, handleShowForm,callback }) {
                                 user_current_coin: userCurrentCoin
                             };
                             try {
-                                const resEnrollment = await axios.post('/api/insert-enrollment', enrollData);
+                                const resEnrollment = await axios.post('https://localhost:7074/Course/insert-enrollment', enrollData);
                                 setEnrollment(resEnrollment.data);
                                 console.log(resEnrollment);
                             }

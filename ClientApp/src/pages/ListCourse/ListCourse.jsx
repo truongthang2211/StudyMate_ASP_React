@@ -6,44 +6,33 @@ import { Link } from 'react-router-dom';
 import './ListCourse.css'
 
 function ListCourse() {
-    const { maintypeId, subtypeId } = useParams();
-    console.log(maintypeId, subtypeId);
+    const {maintypeId,subtypeId} = useParams();
 
     const [courses, setCourses] = useState([]);
+    let url;
+    let postData;
+
+    if(subtypeId === 'null'){
+        postData = maintypeId;
+        url = "https://localhost:7074/Course/get-courses-by-maintype";
+    }
+    else{
+        url = "https://localhost:7074/Course/get-courses-by-subtype";
+        postData = subtypeId;
+    }
 
     useEffect(async () => {
-        var url = '/api/get-courses-by-subtype'
-        var postData = subtypeId;
-        if (subtypeId === 'null') {
-            url = '/api/get-courses-by-maintype'
-            postData = maintypeId
-        }
         try {
-            const resCourses = await axios.post(url, { postData });
-            setCourses(resCourses.data.message);
+            const resCourses = await axios.post(url,{postData});
             console.log(resCourses);
+            setCourses(resCourses.data.message);
         } catch (error) {
             console.log(error);
         }
-    }, [maintypeId, subtypeId]);
+    },[maintypeId,subtypeId]);
 
     return (
         <>
-            {/* <div id="header" style={{ backgroundImage: "url('/img/courses/header-img.png')" }}>
-                <div className="container" >
-                    <h2>Learning online. Let's start your knowledge journey!</h2>
-                    <div id="search">
-                        <div className="input-group">
-                            <form action="" id="form-search">
-                                <input name="name" id="search-course" className="form-control" type="text" placeholder="Search..." />
-                                <span className="input-group-btn">
-                                    <i className="fas fa-search"></i>
-                                </span>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div> */}
             <div className="slider container">
                 <div className="row">
                     <div className="col-lg-3 menu-left-new">
@@ -406,12 +395,12 @@ function ListCourse() {
                                 key={index}
                                 desc={course.course.course_desc}
                                 title={course.course.course_name}
-                                author={course.course.fullname}
+                                author={course.author[0] && course.author[0].fullname}
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
-                                upVote={course.upVote[0].numOfUpvote}
-                                downVote={course.downVote[0].numOfDownvote}
+                                upVote={course.upVote}
+                                downVote={course.downVote}
                                 author_id={course.course.author_id}
                             />
                         )}
