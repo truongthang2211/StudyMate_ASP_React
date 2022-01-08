@@ -386,7 +386,7 @@ function Home() {
                                 key={index}
                                 desc={course.course.course_desc}
                                 title={course.course.course_name}
-                                author={course.course.fullname}
+                                author={course.author[0] && course.author[0].fullname}
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
@@ -405,7 +405,7 @@ function Home() {
                                 key={index}
                                 desc={course.course.course_desc}
                                 title={course.course.course_name}
-                                author={course.course.fullname}
+                                author={course.author[0] && course.author[0].fullname}
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
@@ -424,7 +424,7 @@ function Home() {
                                 key={index}
                                 desc={course.course.course_desc}
                                 title={course.course.course_name}
-                                author={course.course.fullname}
+                                author={course.author[0] && course.author[0].fullname}
                                 img={course.course.img}
                                 fee={course.course.fee}
                                 courseId={course.course.course_id}
