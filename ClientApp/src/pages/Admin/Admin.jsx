@@ -11,6 +11,7 @@ import MyInfo from '../MyInfo/MyInfo';
 import moment from 'moment';
 import CreateCourse from '../CreateCourse/CreateCourse';
 import Learn from '../Learn/Learn';
+axios.defaults.withCredentials = true
 export default function Admin() {
     const [User, setUser] = useState()
     const [Admin, setAdmin] = useState(() => {
@@ -22,7 +23,7 @@ export default function Admin() {
 
     }, [])
     const LoadUser = async () => {
-        const res = await axios.get('/api/get-user-admin')
+        const res = await axios.get('https://localhost:7074/Admin/get-user-admin')
         console.log(res);
         if (res.data.user) {
             setUser({ ...res.data.user });
@@ -50,7 +51,7 @@ function AdminLogin() {
     }
     const handleSignIn = async (e) => {
         e.preventDefault();
-        const res = await axios.post('/api/login', state)
+        const res = await axios.post('https://localhost:7074/Admin/login', state)
         console.log(res)
         if (res.data.status == 200) {
             window.location.reload();
@@ -90,7 +91,7 @@ function AdminPage({ User }) {
     if (id) {
         return <Feature action={action} feature={feature} id={id} />;
     }
-    
+
     const handleLogout = () => {
         document.cookie = 'StudyMateAdmin' + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         window.location.reload();
@@ -153,7 +154,7 @@ function Overview() {
     const topUserColumn = [
         {
             name: 'Họ tên',
-            selector: row => <Link to={`/profile/${row.USER_ID}`} target="_blank">{row.FULLNAME}</Link>,
+            selector: row => <Link to={`/profile/${row.user_id}`} target="_blank">{row.fullname}</Link>,
             sortable: true,
         },
         {
@@ -180,12 +181,12 @@ function Overview() {
     const topCourseColumn = [
         {
             name: 'CourseID',
-            selector: row => row.COURSE_ID,
+            selector: row => row.course_id,
             sortable: true,
         },
         {
             name: 'Tên khóa học',
-            selector: row => row.COURSE_NAME,
+            selector: row => row.course_name,
             sortable: true,
         },
         {
@@ -196,7 +197,7 @@ function Overview() {
     ]
     const [data, setData] = useState();
     const updateOverview = async () => {
-        const res = await axios.get('/api/get-overview-admin');
+        const res = await axios.get('https://localhost:7074/Admin/get-overview-admin');
         console.log(res);
         setData(res.data.message);
 
@@ -224,7 +225,7 @@ function Overview() {
     };
     const [dataanal, setDataanal] = useState(TempDataAnal);
     const [timevalue, setTimevalue] = useState('7d');
-    const [typevalue, setTypevalue] = useState('Payments');
+    const [typevalue, setTypevalue] = useState('payments');
     const [TimeContent, setTimeContent] = useState('7 ngày qua')
     const [TypeContent, setTypeContent] = useState('Doanh thu')
     const [TotalContent, setTotalContent] = useState(0)
@@ -239,13 +240,13 @@ function Overview() {
             Timetype = 'months'
             FormatType = 'MM/YYYY';
         }
-        var CreateAt = TYPE == 'Payments' ? 'ENROLL_TIME' : 'CREATED_AT'
+        var CreateAt = TYPE == 'payments' ? 'enroll_time' : 'created_at'
         var Total = 0;
         for (var i = NumberLabel; i > -1; --i) {
             var thisMoment = moment().subtract(i, Timetype)
             LabelAnal.push(thisMoment.format(FormatType.replace('/YYYY', '')))
             var number = 0;
-            if (TYPE != 'Payments') {
+            if (TYPE != 'payments') {
                 number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).length
             } else {
                 number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).reduce((a, b) => a + b.AMOUNT, 0)
@@ -254,7 +255,7 @@ function Overview() {
             DataAnal[0].data.push(number)
             Total += number;
         }
-        DataAnal[0].label = TYPE == 'Payments' ? "Doanh thu" : TYPE == 'Courses' ? "Khóa học" : "Người dùng";
+        DataAnal[0].label = TYPE == 'payments' ? "Doanh thu" : TYPE == 'Courses' ? "Khóa học" : "Người dùng";
 
         setTotalContent(Total)
         setDataanal({ labels: LabelAnal, datasets: DataAnal })
@@ -277,10 +278,10 @@ function Overview() {
     }
 
     const CourseToday = !data ? "Loading..." :
-        data.Courses.filter(e => moment().format("DD/MM/YYYY") == moment(e.CREATED_AT, "YYYY-MM-DD HH:mm:ss")
+        data.courses.filter(e => moment().format("DD/MM/YYYY") == moment(e.created_at, "YYYY-MM-DD HH:mm:ss")
             .format("DD/MM/YYYY")).length
     const CourseYesterday = !data ? "Loading..." :
-        data.Courses.filter(e => moment().subtract(1, 'days').format("DD/MM/YYYY") == moment(e.CREATED_AT, "YYYY-MM-DD HH:mm:ss")
+        data.courses.filter(e => moment().subtract(1, 'days').format("DD/MM/YYYY") == moment(e.created_at, "YYYY-MM-DD HH:mm:ss")
             .format("DD/MM/YYYY")).length
     return (
         <div className="admin-manage-overview">
@@ -290,22 +291,22 @@ function Overview() {
                     <div className="overview-info-left-top">
                         <div className="card-body p-3 text-center border-shadow-box">
                             <p className="text text-center" style={{ color: "green" }} >
-                                {!data ? "Loading..." :((data.RevenueToDay - data.RevenueYesterDay)*100
-                                    / ((data.RevenueToDay + data.RevenueYesterDay) == 0 ? 1 : (data.RevenueToDay + data.RevenueYesterDay))).toFixed(2)}%</p>
-                            <div className="h1 m-0">{!data ? "Loading..." : formatNumber(data.RevenueToDay)} đ</div>
+                                {!data ? "Loading..." : ((data.revenueToDay - data.revenueYesterDay) * 100
+                                    / ((data.revenueToDay + data.revenueYesterDay) == 0 ? 1 : (data.revenueToDay + data.revenueYesterDay))).toFixed(2)}%</p>
+                            <div className="h1 m-0">{!data ? "Loading..." : formatNumber(data.revenueToDay)} đ</div>
                             <p className="text  mb-4" color="gray">Doanh thu hôm nay</p>
                         </div>
                         <div className="card-body p-3 text-center border-shadow-box">
                             <p className="text text-center" style={{ color: "green" }} >
-                                {!data ? "Loading..." : ((data.UserToDay - data.UserYesterDay)*100
-                                    / ((data.UserToDay + data.UserYesterDay) == 0 ? 1 : (data.UserToDay + data.UserYesterDay))).toFixed(2)}%</p>
-                            <div className="h1 m-0">{!data ? "Loading..." : data.UserToDay}</div>
+                                {!data ? "Loading..." : ((data.userToDay - data.userYesterDay) * 100
+                                    / ((data.userToDay + data.userYesterDay) == 0 ? 1 : (data.userToDay + data.userYesterDay))).toFixed(2)}%</p>
+                            <div className="h1 m-0">{!data ? "Loading..." : data.userToDay}</div>
                             <p className="text  mb-4" color="gray">Người dùng hôm nay</p>
                         </div>
                         <div className="card-body p-3 text-center border-shadow-box">
                             <p className="text text-center" style={{ color: "green" }} >
-                                {((CourseToday - CourseYesterday) *100/ 
-                                ((CourseToday + CourseYesterday) == 0 ? 1 : (CourseToday + CourseYesterday))).toFixed(2)}%</p>
+                                {((CourseToday - CourseYesterday) * 100 /
+                                    ((CourseToday + CourseYesterday) == 0 ? 1 : (CourseToday + CourseYesterday))).toFixed(2)}%</p>
                             <div className="h1 m-0">{CourseToday}</div>
                             <p className="text  mb-4" color="gray">Khóa học hôm nay</p>
                         </div>
@@ -313,9 +314,9 @@ function Overview() {
                     <div className="overview-info-left-bottom">
                         <div className="card-body p-3 text-center border-shadow-box">
                             <p className="text text-center" style={{ color: "green" }} >
-                                {!data ? "Loading..." : ((data.RevenueToDay - data.RevenueYesterDay)
-                                    / ((data.TotalRevenue) == 0 ? 1 : (data.TotalRevenue))).toFixed(4)}%</p>
-                            <div className="h1 m-0">{!data ? "Loading..." : formatNumber(data.TotalRevenue)} đ</div>
+                                {!data ? "Loading..." : ((data.revenueToDay - data.revenueYesterDay)
+                                    / ((data.totalRevenue) == 0 ? 1 : (data.totalRevenue))).toFixed(4)}%</p>
+                            <div className="h1 m-0">{!data ? "Loading..." : formatNumber(data.totalRevenue)} đ</div>
                             <p className="text  mb-4" color="gray">Tổng doanh thu</p>
                         </div>
                     </div>
@@ -330,9 +331,9 @@ function Overview() {
                             <option value="12m">Năm này</option>
                         </select>
                         <select value={typevalue} onChange={handleTypeChange} className="type-combobox">
-                            <option value="Payments">Doanh thu</option>
-                            <option value="Accounts">Người dùng</option>
-                            <option value="Courses">Khóa học</option>
+                            <option value="payments">Doanh thu</option>
+                            <option value="accounts">Người dùng</option>
+                            <option value="courses">Khóa học</option>
                         </select>
 
                     </AnalysisBox>
@@ -375,57 +376,57 @@ const usermanageColumn = [
 
     {
         name: 'UserID',
-        selector: row => row.USER_ID,
+        selector: row => row.user_id,
         sortable: true,
     },
     {
         name: 'Họ tên',
-        selector: row => row.FULLNAME,
+        selector: row => row.fullname,
         sortable: true,
     },
     {
         name: 'Ngày sinh',
-        selector: row => row.DATE_OF_BIRTH,
+        selector: row => row.date_of_birth,
         sortable: true,
     },
     {
         name: 'Email',
-        selector: row => row.EMAIL,
+        selector: row => row.email,
         sortable: true,
     },
     {
         name: 'Coin',
-        selector: row => formatNumber(row.COIN),
+        selector: row => formatNumber(row.coin),
         sortable: true,
     },
     {
         name: 'SĐT',
-        selector: row => row.PHONE,
+        selector: row => row.phone,
         sortable: true,
     },
     {
         name: 'Trường học',
-        selector: row => row.SCHOOL,
+        selector: row => row.school,
         sortable: true,
     },
     {
         name: 'Facebook',
-        selector: row => row.FACEBOOK,
+        selector: row => row.facebook,
         sortable: true,
     },
     {
         name: 'Linkedln',
-        selector: row => row.LINKEDLN,
+        selector: row => row.linkedln,
         sortable: true,
     },
     {
         name: 'Bio',
-        selector: row => row.BIO,
+        selector: row => row.bio,
         sortable: true,
     },
     {
         name: 'Hành động',
-        selector: row => <UpdateAction view={`/profile/${row.USER_ID}`} edit={"edit/" + row.USER_ID} />,
+        selector: row => <UpdateAction view={`/profile/${row.user_id}`} edit={"edit/" + row.user_id} />,
         minWidth: '200px',
     },
 ];
@@ -456,57 +457,57 @@ function Approval(props) {
         updateapp()
     }, [])
     const updateapp = async () => {
-        const res = await axios.get('/api/get-list-createapp')
+        const res = await axios.get('https://localhost:7074/Admin/get-list-createapp')
         console.log(res)
         setPending(false);
-        setData(res.data.message.filter(e => e.CourseState == 'Chờ duyệt bài'))
+        setData(res.data.message.filter(e => e.coursestate == 'Chờ duyệt bài'))
     }
     const approvalColumn = [
         {
             name: 'Tên khóa học',
-            selector: row => row.CourseTitle,
+            selector: row => row.coursetitle,
             sortable: true,
         },
         {
             name: 'Danh mục',
-            selector: row => row.CourseType,
+            selector: row => row.coursetype,
             sortable: true,
         },
         {
             name: 'Tác giả',
-            selector: row => <Link to={`/profile/${row.Author.UserID}`}>{row.Author.FullName}</Link>,
+            selector: row => <Link to={`/profile/${row.author.userid}`}>{row.author.fullname}</Link>,
             sortable: true,
         },
         {
             name: 'Ngày đăng ký',
-            selector: row => row.CourseCreate,
+            selector: row => row.coursecreate,
             sortable: true,
         },
         {
             name: 'Giá',
-            selector: row => formatNumber(row.Fee),
+            selector: row => formatNumber(row.fee),
             sortable: true,
         },
         {
             name: 'Tình trạng',
-            selector: row => row.CourseState,
+            selector: row => row.coursestate,
             sortable: true,
         },
 
         {
             name: 'Thực hiện',
-            selector: row => row.ActionType,
+            selector: row => row.actiontype,
             minWidth: '200px',
         },
         {
             name: 'Hành động',
 
-            selector: row => <Link to={"learn/" + row._id.$oid} target="_blank" rel="noopener" className="btn my-custom-button-default"><i className="far fa-eye"></i></Link>,
+            selector: row => <Link to={"learn/" + row._id} target="_blank" rel="noopener" className="btn my-custom-button-default"><i className="far fa-eye"></i></Link>,
             minWidth: '200px',
         },
         {
             name: 'Hành động',
-            selector: row => <ApprovalAction actiontype={row.ActionType} callback={updateapp} _id={row._id} />,
+            selector: row => <ApprovalAction actiontype={row.actiontype} callback={updateapp} _id={row._id} />,
             minWidth: '200px',
         },
     ]
@@ -534,7 +535,7 @@ function CourseManage(props) {
     const [searchvalue, setSearchvalue] = useState('');
     const [data, setData] = useState();
     const updateData = async () => {
-        const res = await axios.get('/api/get-list-course')
+        const res = await axios.get('https://localhost:7074/Admin/get-list-course')
         console.log(res)
         setData(res.data.message)
     }
@@ -544,48 +545,48 @@ function CourseManage(props) {
     const coursemanageColumn = [
         {
             name: 'ID khóa học',
-            selector: row => row.CourseID,
+            selector: row => row.courseid,
             sortable: true,
         },
         {
             name: 'Tên khóa học',
-            selector: row => row.CourseTitle,
+            selector: row => row.coursetitle,
             sortable: true,
         },
         {
             name: 'Danh mục',
-            selector: row => row.CourseType,
+            selector: row => row.coursetype,
             sortable: true,
         },
         {
             name: 'Tác giả',
-            selector: row => row.Author.FullName,
+            selector: row => row.author.fullname,
             sortable: true,
         },
         {
             name: 'Ngày đăng ký',
-            selector: row => row.CourseCreate,
+            selector: row => row.coursecreate,
             sortable: true,
         },
         {
             name: 'Giá',
-            selector: row => formatNumber(row.Fee),
+            selector: row => formatNumber(row.fee),
             sortable: true,
         },
         {
             name: 'Hoa hồng',
-            selector: row => row.Commission,
+            selector: row => row.commission,
             sortable: true,
         },
         {
             name: 'Tình trạng',
-            selector: row => row.CourseState,
+            selector: row => row.coursestate,
             sortable: true,
         },
         {
             name: 'Hành động',
-            selector: row => <UpdateAction view={"learn/" + row.CourseID} callback={updateData}
-                edit={"edit/" + row.CourseID} state={row.CourseState} course_id={row.CourseID} />,
+            selector: row => <UpdateAction view={"learn/" + row.courseid} callback={updateData}
+                edit={"edit/" + row.courseid} state={row.coursestate} course_id={row.courseid} />,
             minWidth: '200px',
         },
     ];
@@ -612,7 +613,7 @@ function UserManage(props) {
     const [data, setData] = useState();
     const [searchvalue, setSearchvalue] = useState('');
     useEffect(async () => {
-        const res = await axios.get('/api/get-list-user')
+        const res = await axios.get('https://localhost:7074/Admin/get-list-user')
         console.log(res)
         setData(res.data.message)
     }, [])
@@ -641,34 +642,34 @@ function Approvaled(props) {
 
         {
             name: 'ApprovalID',
-            selector: row => row.APPROVAL_ID,
+            selector: row => row.approval_id,
             sortable: true,
         },
         {
             name: 'ID khóa học',
-            selector: row => row.COURSE_ID,
+            selector: row => row.course_id,
             sortable: true,
         },
         {
             name: 'Thời gian',
-            selector: row => row.APPROVE_TIME,
+            selector: row => row.approve_time,
             sortable: true,
         },
         {
             name: 'Hành động',
-            selector: row => row.ACCEPT ? "Chấp nhận" : "Từ chối",
+            selector: row => row.accept ? "Chấp nhận" : "Từ chối",
             sortable: true,
         },
         {
             name: 'Lý do',
-            selector: row => row.REASON,
+            selector: row => row.reason,
             sortable: true,
         },
 
     ];
     const [data, setData] = useState();
     useEffect(async () => {
-        const res = await axios.get('/api/get-list-approvaled')
+        const res = await axios.get('https://localhost:7074/Admin/get-list-approvaled')
         console.log(res)
         setData(res.data.message)
     }, [])
@@ -703,7 +704,7 @@ function ApprovalAction(props) {
             confirmButtonText: 'Xác nhận',
             showLoaderOnConfirm: true,
             preConfirm: async (reason) => {
-                const res = await axios.post('/api/action-course', { _id: props._id, accept: false, reason: reason })
+                const res = await axios.post('https://localhost:7074/Admin/action-course', { _id: props._id, accept: false, reason: reason })
                 console.log(res)
                 props.callback();
             },
@@ -711,9 +712,9 @@ function ApprovalAction(props) {
         })
     }
     const handleAccept = async () => {
-        var url = '/api/action-course'
+        var url = 'https://localhost:7074/Admin/action-course'
         if (props.actiontype == 'Sửa đổi') {
-            url = '/api/update-course-app'
+            url = 'https://localhost:7074/Admin/update-course-app'
         }
         const res = await axios.post(url, { _id: props._id, accept: true })
         console.log(res)
@@ -740,7 +741,7 @@ function UpdateAction(props) {
                 confirmButtonText: 'Xác nhận',
                 showLoaderOnConfirm: true,
                 preConfirm: async (reason) => {
-                    const res = await axios.post('/api/lock-course-action', { course_id: props.course_id, reason: reason })
+                    const res = await axios.post('https://localhost:7074/Admin/lock-course-action', { course_id: props.course_id, reason: reason })
                     console.log(res)
                     props.callback();
                 },
@@ -756,7 +757,7 @@ function UpdateAction(props) {
                 confirmButtonText: 'Xác nhận'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    const res = await axios.post('/api/lock-course-action', { course_id: props.course_id })
+                    const res = await axios.post('https://localhost:7074/Admin/lock-course-action', { course_id: props.course_id })
                     console.log(res)
                     props.callback();
                 }
@@ -778,15 +779,15 @@ function Feature({ feature, action, id }) {
         let post_obj;
         if (action == 'edit') {
             if (feature == 'user-manage') {
-                url = '/api/get-user';
+                url = 'https://localhost:7074/Admin/get-user';
                 post_obj = { user_id: id }
             } else if (feature == 'course-manage') {
-                url = '/api/get-course';
+                url = 'https://localhost:7074/Admin/get-course';
                 post_obj = { course_id: id }
             }
         } else {
             if (feature == 'approval') {
-                url = '/api/get-learn-app';
+                url = 'https://localhost:7074/Admin/get-learn-app';
                 post_obj = { course_id: id }
 
             }

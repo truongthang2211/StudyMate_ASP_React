@@ -12,7 +12,7 @@ import My404 from '../My404/My404'
 import { ListCourse } from '../../Data.js'
 
 const ThisUserID = new URLSearchParams(document.cookie.replaceAll("; ", "&")).get('StudyMate');
-export default memo(function Learn({ LearnData, Admin ,User}) {
+export default memo(function Learn({ LearnData, Admin, User }) {
     const [pending, setPending] = useState(true);
     const { course, lesson } = useParams();
     const { feature, id, subid } = useParams();
@@ -86,11 +86,11 @@ export default memo(function Learn({ LearnData, Admin ,User}) {
 
                 setPending(false)
                 setData(res.data.message)
-                setVideoID(youtube_id(res.data.message.LearningURL))
-            } else if (LearnData && LearnData.LearningURL) {
+                setVideoID(youtube_id(res.data.message.learningurl))
+            } else if (LearnData && LearnData.learningurl) {
                 setPending(false)
                 setData(LearnData)
-                setVideoID(youtube_id(LearnData.LearningURL))
+                setVideoID(youtube_id(LearnData.learningurl))
             }
 
 
@@ -127,11 +127,11 @@ export default memo(function Learn({ LearnData, Admin ,User}) {
     }
     let TimerId = 0;
     const handleVideoPlaying = async (e) => {
-        if (e.data == 1 && !Admin && ThisUserID != dataLearning.Author) {
+        if (e.data == 1 && !Admin && ThisUserID != dataLearning.author) {
             TimerId = setInterval(() => {
                 if (e.target.getCurrentTime() / e.target.getDuration() > 0.8) {
-                    if (dataLearning.LastLessonLearnt + 1 == lesson || dataLearning.LastLessonLearnt == -1) {
-                        // var url = dataLearning.ListLearn.map(e => {
+                    if (dataLearning.lastlessonlearnt + 1 == lesson || dataLearning.lastlessonlearnt == -1) {
+                        // var url = dataLearning.listlearn.map(e => {
                         //     var t = e.Lesson.filter(r => (r.LESSON_ID == 1116))
                         //     if (t.length > 0) return t
                         // }).filter(c => c)[0][0].LESSON_URL
@@ -155,7 +155,7 @@ export default memo(function Learn({ LearnData, Admin ,User}) {
                 <Link className="breadcrumb-item" to="/"><i className="fas fa-home"></i></Link>
                 <Link className="breadcrumb-item" to={`/list-course/${dataLearning.CourseMainType && dataLearning.CourseMainType.COURSE_MAINTYPE_ID}`}>{dataLearning.CourseMainType && dataLearning.CourseMainType.TYPE_NAME}</Link>
                 <Link className="breadcrumb-item" to={`/list-course/null/${dataLearning.CourseType && dataLearning.CourseType.COURSE_SUBTYPE_ID}`}>{dataLearning.CourseType && dataLearning.CourseType.TYPE_NAME}</Link>
-                <span className="breadcrumb-item active">{dataLearning.CourseTitle}</span>
+                <span className="breadcrumb-item active">{dataLearning.coursetitle}</span>
             </div>
             <div className="video-learning">
                 <YouTube opts={opts} videoId={videoid} onReady={_onReady} onStateChange={handleVideoPlaying} />
@@ -204,29 +204,29 @@ export default memo(function Learn({ LearnData, Admin ,User}) {
 
         </div>
         <div id="right-learning">
-            <RightHeader learnt={dataLearning.ListLearn && dataLearning.ListLearn.reduce((a, b) => a + b.Lesson.filter(e => e.LESSON_ID <= dataLearning.LastLessonLearnt).length, 0)}
-                totalLesson={dataLearning.ListLearn && dataLearning.ListLearn.reduce((a, b) => a + b.Lesson.length, 0)}
-                title={dataLearning.ListLearn && dataLearning.CourseTitle} />
-            {dataLearning.ListLearn && dataLearning.ListLearn.map((item, index) => {
+            <RightHeader learnt={dataLearning.listlearn && dataLearning.listlearn.reduce((a, b) => a + b.lesson.filter(e => e.lesson_id <= dataLearning.lastlessonlearnt).length, 0)}
+                totalLesson={dataLearning.listlearn && dataLearning.listlearn.reduce((a, b) => a + b.lesson.length, 0)}
+                title={dataLearning.listlearn && dataLearning.coursetitle} />
+            {dataLearning.listlearn && dataLearning.listlearn.map((item, index) => {
                 return (
                     <Collapsible className="playlist-wrapper" key={index}>
-                        <Chapter learnt={item.Lesson.filter(e => e.LESSON_ID <= dataLearning.LastLessonLearnt).length}
-                            title={item.ChapterTitle} totalLesson={item.Lesson.length} Duration={msecToTime(item.Lesson.reduce((a, b) => a + b.DURATION, 0))} />
+                        <Chapter learnt={item.lesson.filter(e => e.lesson_id <= dataLearning.laslessonlearnt).length}
+                            title={item.chaptertitle} totalLesson={item.lesson.length} Duration={msecToTime(item.lesson.reduce((a, b) => a + b.duration, 0))} />
                         <div className="playlist-wrapper-list">
                             {
-                                item.Lesson.map((less, index2) => {
-                                    if (less.LESSON_ID == dataLearning.LastLessonLearnt + 1 || (dataLearning.LastLessonLearnt == -1 && less.LESSON_ID == lesson) || dataLearning.Author == ThisUserID || Admin) {
+                                item.lesson.map((less, index2) => {
+                                    if (less.lesson_id == dataLearning.laslessonlearnt + 1 || (dataLearning.laslessonlearnt == -1 && less.lesson_id == lesson) || dataLearning.author == ThisUserID || Admin) {
                                         status = 'normal-item'
-                                    } else if (less.LESSON_ID < dataLearning.LastLessonLearnt + 1) {
+                                    } else if (less.lesson_id < dataLearning.laslessonlearnt + 1) {
                                         status = 'learnt-item'
-                                    } else if (less.LESSON_ID > dataLearning.LastLessonLearnt + 1) {
+                                    } else if (less.lesson_id > dataLearning.laslessonlearnt + 1) {
                                         status = 'block-item'
                                     }
-                                    if ((!Admin && less.LESSON_ID == lesson) || less.LESSON_ID == subid || subid == index2) {
+                                    if ((!Admin && less.lesson_id == lesson) || less.lesson_id == subid || subid == index2) {
                                         status += ' learning-item'
                                     }
                                     return (
-                                        <Lession status={status} handleLesson={handleLesson} lesson_id={less.LESSON_ID ?? index2} videoURL={less.LESSON_URL} key={index2} title={less.LESSON_NAME} duration={msecToTime(less.DURATION)} />
+                                        <Lession status={status} handleLesson={handleLesson} lesson_id={less.lesson_id ?? index2} videoURL={less.lesson_url} key={index2} title={less.lesson_name} duration={msecToTime(less.duration)} />
                                     );
                                 })}
                         </div>

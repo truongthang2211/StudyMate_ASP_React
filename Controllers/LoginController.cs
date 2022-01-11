@@ -35,11 +35,12 @@ public class LoginController : ControllerBase
         UserEmail = UserEmail != null ? UserEmail : string.Empty;
         var emailExist = from user in context.users where user.Email == UserEmail select user;
         var accountExist = from acc in context.accounts where acc.Username == Account select acc;
-        if (emailExist == null && accountExist == null)
+        if (emailExist.Count() == 0 && accountExist.Count() == 0)
         {
             User u = new User();
             u.Fullname = Account;
             u.Email = UserEmail;
+            u.Coin=0;
             context.users.Add(u);
             context.SaveChanges();
             context.Entry(u).GetDatabaseValues();
@@ -55,7 +56,7 @@ public class LoginController : ControllerBase
 
 
         }
-        return new JsonResult(new { status = 400, message = "Email hoặc username đã tồn tại" });
+        return new JsonResult(new { status = 400, message = "Email hoặc username đã tồn tại", username = emailExist, account = accountExist });
     }
 
 
@@ -143,7 +144,7 @@ public class LoginController : ControllerBase
         {
             string id = HttpContext.Request.Cookies["StudyMate"];
             DBContext context = new DBContext();
-           var notis = from n in context.notifications where n.User_id.ToString() == id orderby n.Noti_id descending select n;
+            var notis = from n in context.notifications where n.User_id.ToString() == id orderby n.Noti_id descending select n;
             return (new { status = 200, message = notis });
         }
         else
@@ -165,7 +166,7 @@ public class LoginController : ControllerBase
             DBContext context = new DBContext();
             MySqlConnection conn = context.GetConnection();
             string strSQL = $"Update Notifications set read_state = 1 where user_id = {id}";
-            MySqlCommand cmd = new MySqlCommand(strSQL,conn);
+            MySqlCommand cmd = new MySqlCommand(strSQL, conn);
             conn.Open();
             cmd.ExecuteNonQuery();
             conn.Close();
