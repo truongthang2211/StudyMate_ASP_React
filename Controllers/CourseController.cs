@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using StudyMate_ASP_React.Models;
 using System.Collections;
 using Microsoft.AspNetCore.Cors;
+using MySql.Data.MySqlClient;
 
 namespace StudyMate_ASP_React.Controllers;
 
@@ -13,7 +14,7 @@ namespace StudyMate_ASP_React.Controllers;
 [EnableCors("AllowSetOrigins")]
 public class CourseController : ControllerBase
 {
-    [Route("get-upvote"), HttpGet]
+    // Sub-function
     public int GetUpvote(int Course_id)
     {
         var context = new DBContext();
@@ -23,8 +24,6 @@ public class CourseController : ControllerBase
                             select cv).Count();
         return total_upvote;
     }
-
-    [Route("get-downvote"), HttpGet]
     public int GetDownvote(int Course_id)
     {
         var context = new DBContext();
@@ -34,8 +33,6 @@ public class CourseController : ControllerBase
                               select cv).Count();
         return total_downvote;
     }
-
-    [Route("get-course-author"), HttpGet]
     public IQueryable<User> GetCourseAuthor(int Author_id)
     {
         var context = new DBContext();
@@ -226,30 +223,68 @@ public class CourseController : ControllerBase
         });
     }
 
-    // HAM NAY CHUA HOAN THANH XONG -> DOI CO COOKIES
     [Route("check-enrolled"), HttpPost]
     public JsonResult CheckEnrolled()
     {
-        var reader = new StreamReader(HttpContext.Request.Body);
-        var body = reader.ReadToEnd();
-        dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
-        var context = new DBContext();
-
-        return new JsonResult(new
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
         {
-            cookie = Request.Cookies["StudyMate"]
-        });
+            var reader = new StreamReader(HttpContext.Request.Body);
+            var body = reader.ReadToEnd();
+            dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
+            var context = new DBContext();
+
+            int user_id = Convert.ToInt32(HttpContext.Request.Cookies["StudyMate"]);
+            int course_id = (int)data.courseId;
+            var ans = (from e in context.enrollments
+                       where e.User_id == user_id
+                       where e.Course_id == course_id
+                       select e).FirstOrDefault();
+            return new JsonResult(new
+            {
+                status = 200,
+                message = ans
+            });
+        }
+        else
+        {
+            return new JsonResult(new
+            {
+                status = 400,
+                message = "Check enroll - Cookies het han"
+            });
+        }
     }
 
-    // HAM NAY CHUA HOAN THANH XONG -> DOI CO COOKIES
     [Route("check-owner"), HttpPost]
     public JsonResult CheckOwner()
     {
-
-        return new JsonResult(new
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
         {
+            var reader = new StreamReader(HttpContext.Request.Body);
+            var body = reader.ReadToEnd();
+            dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
+            var context = new DBContext();
 
-        });
+            int user_id = Convert.ToInt32(HttpContext.Request.Cookies["StudyMate"]);
+            int course_id = (int)data.courseId;
+            int ans = (from c in context.courses
+                       where c.Author_id == user_id
+                       where c.Course_id == course_id
+                       select c).Count();
+            if (ans == 1)
+            {
+                return new JsonResult(new
+                {
+                    status = 200,
+                    message = true
+                });
+            }
+            return new JsonResult(new { status = 200, message = false });
+        }
+        else
+        {
+            return new JsonResult(new { status = 400, message = "Check owner - Cookies het han" });
+        }
     }
 
     [Route("insert-payment"), HttpPost]
@@ -279,6 +314,7 @@ public class CourseController : ControllerBase
             {
                 receiver.Coin += amount;
                 await context.SaveChangesAsync();
+                System.Console.WriteLine($"Updated receiver coin");
             }
         }
     }
@@ -293,6 +329,7 @@ public class CourseController : ControllerBase
             {
                 sender.Coin = amount;
                 await context.SaveChangesAsync();
+                System.Console.WriteLine($"Updated sender coin");
             }
         }
     }
@@ -320,7 +357,7 @@ public class CourseController : ControllerBase
                 Course_id = course_id,
             });
             int rows = await context.SaveChangesAsync();
-            // System.Console.WriteLine($"{rows} enrollment inserted");
+            System.Console.WriteLine($"{rows} enrollment inserted");
             var enrollment = (from e in context.enrollments
                               where e.User_id == user_id
                               where e.Course_id == course_id
@@ -334,117 +371,179 @@ public class CourseController : ControllerBase
         }
     }
 
+    // Sub-function
+    public IQueryable<Lesson> GetLesson(int chapter_id)
+    {
+        var context = new DBContext();
+        var lesson = (from l in context.lessons
+                      where l.Chapter_id == chapter_id
+                      select l);
+        return lesson;
+    }
+    public int GetNumOfLessonInChapter(int chapter_id)
+    {
+        var context = new DBContext();
+        int result = (from l in context.lessons
+                      where l.Chapter_id == chapter_id
+                      select l).Count();
+        return result;
+    }
     [Route("get-course-detail-by-id"), HttpPost]
     public JsonResult GetCourseDetailById()
     {
-        var reader = new StreamReader(HttpContext.Request.Body);
-        var body = reader.ReadToEnd();
-        dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
-        var context = new DBContext();
+        try
+        {
+            var reader = new StreamReader(HttpContext.Request.Body);
+            var body = reader.ReadToEnd();
+            dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
+            var context = new DBContext();
 
-        int id = (int)data.courseId;
-        var course_general = (from c in context.courses
-                              join user in context.users on c.Author_id equals user.User_id
-                              where c.Course_id == id
-                              select new
-                              {
-                                  course_name = c.Course_name,
-                                  course_desc = c.Course_desc,
-                                  course_state = c.Course_state,
-                                  img = c.Img,
-                                  fee = c.Fee,
-                                  commission = c.Commission,
-                                  author = user.User_id,
-                                  fullname = user.Fullname
-                              }).FirstOrDefault();
-        var course_gains = from cg in context.course_gains
-                           where cg.Course_id == id
-                           select new
-                           {
-                               content = cg.Content
-                           };
-        var course_requires = from cr in context.course_requires
-                              where cr.Course_id == id
-                              select new
-                              {
-                                  content = cr.Content
-                              };
-        var duration_list = from l in context.lessons
-                            join cc in context.course_chapters on l.Chapter_id equals cc.Course_chapter_id
-                            where cc.Course_chapter_id == id
-                            select new { l.Duration };
-        // int? total_duration = duration_list.Select(x => x.Duration).Sum();
-        int? total_duration = duration_list.AsEnumerable().Sum(l => l.Duration);
-        var course_chapters = from cc in context.course_chapters
-                              where cc.Course_id == id
-                              select cc;
-        ArrayList list_learn = new ArrayList();
-        foreach (var chapter in course_chapters)
-        {
-            var less_in_chapter = from l in context.lessons
-                                  where l.Chapter_id == chapter.Course_chapter_id
-                                  select l;
-            var num_of_chapter_less = (from l in context.lessons
-                                       where l.Chapter_id == chapter.Course_chapter_id
-                                       select l).Count();
-            var obj = new {
-                chapterTitle = chapter.Chapter_name,
-                lessons = less_in_chapter,
-                numOfChapterLess = num_of_chapter_less
-            };
-            list_learn.Add(obj);
+            int id = (int)data.courseId;
+            var course_general = (from c in context.courses
+                                  join user in context.users on c.Author_id equals user.User_id
+                                  where c.Course_id == id
+                                  select new
+                                  {
+                                      course_name = c.Course_name,
+                                      course_desc = c.Course_desc,
+                                      course_state = c.Course_state,
+                                      img = c.Img,
+                                      fee = c.Fee,
+                                      commission = c.Commission,
+                                      author = user.User_id,
+                                      fullname = user.Fullname
+                                  }).FirstOrDefault();
+            var course_gains = from cg in context.course_gains
+                               where cg.Course_id == id
+                               select new
+                               {
+                                   content = cg.Content
+                               };
+            var course_requires = from cr in context.course_requires
+                                  where cr.Course_id == id
+                                  select new
+                                  {
+                                      content = cr.Content
+                                  };
+            // var duration_list = (from l in context.lessons
+            //                     join cc in context.course_chapters on l.Chapter_id equals cc.Course_chapter_id
+            //                     where cc.Course_chapter_id == id
+            //                     select l.Duration).Sum();
+            // int? total_duration = duration_list.Select(x => x.Duration).Sum();
+            // int? total_duration = duration_list.AsEnumerable().Sum(l => l.Duration);
+            var total_duration = (from l in context.lessons
+                                  join cc in context.course_chapters on l.Chapter_id equals cc.Course_chapter_id
+                                  where cc.Course_chapter_id == id
+                                  select l.Duration).Sum();
+            var course_chapters = from cc in context.course_chapters
+                                  where cc.Course_id == id
+                                  select cc;
+            List<object> list_learn = new List<object>();
+            foreach (var chapter in course_chapters)
+            {
+                var less_in_chapter = GetLesson(chapter.Course_chapter_id);
+                var num_of_chapter_less = GetNumOfLessonInChapter(chapter.Course_chapter_id);
+                var obj = new
+                {
+                    chapterTitle = chapter.Chapter_name,
+                    lessons = less_in_chapter,
+                    numOfChapterLess = num_of_chapter_less
+                };
+                list_learn.Add(obj);
+            }
+            return new JsonResult(new
+            {
+                status = 200,
+                course_general = course_general,
+                course_gains = course_gains,
+                course_requires = course_requires,
+                list_learn = list_learn,
+                total_duration = total_duration
+            });
         }
-        return new JsonResult(new
+        catch (System.Exception e)
         {
-            status = 200,
-            course_general = course_general,
-            course_requires = course_requires,
-            list_learn = list_learn,
-            total_duration = total_duration
-        });
+            return new JsonResult(e);
+        }
+    }
+
+    // Sub-function
+    public User GetUserReview(int User_id)
+    {
+        var context = new DBContext();
+        var user_comm = (from user in context.users
+                         where user.User_id == User_id
+                         select user).FirstOrDefault();
+        return user_comm;
     }
 
     [Route("get-reviews"), HttpPost]
     public JsonResult GetReviewsByCourseId()
     {
-        var reader = new StreamReader(HttpContext.Request.Body);
-        var body = reader.ReadToEnd();
-        dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
-        var context = new DBContext();
-
-        int id = (int)data.course_id;
-
-        var review_list = from cv in context.course_reviews
-                        where cv.Course_id == id
-                        select cv;
-        ArrayList ans = new ArrayList();
-        foreach(var review in review_list)
+        try
         {
-            var user = (from u in context.users
-                    where u.User_id == review.User_id
-                    select u).FirstOrDefault();
-            var obj = new {
-                user = user,
-                review_content = review.Content,
-                review_state = review.Course_review_state
-            };
-            ans.Add(obj);
+            var reader = new StreamReader(HttpContext.Request.Body);
+            var body = reader.ReadToEnd();
+            dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
+            var context = new DBContext();
+
+            int id = (int)data.course_id;
+
+            var review_list = from cv in context.course_reviews
+                              where cv.Course_id == id
+                              select cv;
+            List<object> ans = new List<object>();
+            foreach (var review in review_list)
+            {
+                var user = GetUserReview(review.User_id);
+                var obj = new
+                {
+                    user = user,
+                    review_content = review.Content,
+                    review_state = review.Course_review_state
+                };
+                ans.Add(obj);
+            }
+            return new JsonResult(new
+            {
+                message = ans,
+                status = 200,
+            });
         }
-
-        return new JsonResult(new{
-            status = 200,
-
-        });
+        catch (System.Exception e)
+        {
+            return new JsonResult(e.ToString());
+        }
     }
 
     // CHUA HOAN THANH -> DOI CO COOKIES
     [Route("add-course-review"), HttpPost]
     public JsonResult AddCourseReview()
     {
-        
-        return new JsonResult(new{
+        if (HttpContext.Request.Cookies["StudyMate"] != null)
+        {
+            var reader = new StreamReader(HttpContext.Request.Body);
+            var body = reader.ReadToEnd();
+            dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
+            var context = new DBContext();
 
-        });
+            int user_id = Convert.ToInt32(HttpContext.Request.Cookies["StudyMate"]);
+            int course_id = (int)data.course_id;
+            int review_state = (int)data.state;
+            string content = (string)data.content;
+
+            MySqlConnection conn = context.GetConnection();
+            string str = $"insert into COURSE_REVIEWS values ({user_id},{course_id},{review_state},{content})";
+            MySqlCommand cmd = new MySqlCommand(str, conn);
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            conn.Close();
+            return new JsonResult(new { status = 200, message = "Danh gia khoa hoc thanh cong" });
+        }
+        else
+        {
+            return new JsonResult(new { status = 400, message = "Cookies het han" });
+        }
     }
 
     [Route("em-dep-lam"), HttpPost]

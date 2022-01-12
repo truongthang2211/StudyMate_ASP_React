@@ -143,7 +143,7 @@ public class LoginController : ControllerBase
         {
             string id = HttpContext.Request.Cookies["StudyMate"];
             DBContext context = new DBContext();
-           var notis = from n in context.notifications where n.User_id.ToString() == id orderby n.Noti_id descending select n;
+            var notis = from n in context.notifications where n.User_id.ToString() == id orderby n.Noti_id descending select n;
             return (new { status = 200, message = notis });
         }
         else

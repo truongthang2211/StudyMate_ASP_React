@@ -75,7 +75,7 @@ function InputReviewBlock(props) {
     return (
         <div className="input-review-block">
             <div className="user-avatar">
-                <img src={props.userImg?`/${props.userImg}`:'https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png'} />
+                <img src={props.userImg ? `/${props.userImg}` : 'https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png'} />
             </div>
             <div className="input-review-content">
                 <textarea className="review-input"
@@ -132,7 +132,7 @@ function Review(props) {
     )
 }
 
-export default function Course({ User, handleShowForm,callback }) {
+export default function Course({ User, handleShowForm, callback }) {
 
     const cookieObj = new URLSearchParams(document.cookie.replaceAll("; ", "&"))
     const user_id = cookieObj.get("StudyMate")
@@ -164,12 +164,12 @@ export default function Course({ User, handleShowForm,callback }) {
     // GET COURSE DETAIL
     useEffect(async () => {
         try {
-            const resCourse = await axios.post('https://localhost:7074/Course/get-course-detail-by-id', { courseId });
-            if (resCourse.data.course_general[0].author_id == user_id){
+            const resCourse = await axios.post('https://localhost:7074/Course/get-course-detail-by-id', { courseId: courseId });
+            console.log(resCourse);
+            if (resCourse.data.course_general.author == user_id) {
                 setCheckOwner(true);
             }
             setCourse(resCourse.data);
-            console.log(resCourse);
             console.log(user_id);
         } catch (error) {
             console.log(error);
@@ -179,8 +179,8 @@ export default function Course({ User, handleShowForm,callback }) {
     // CHECK ENROLLED
     useEffect(async () => {
         try {
-            const resCheck = await axios.post('https://localhost:7074/Course/check-enrolled', { courseId });
-            const flag = resCheck.data.message && resCheck.data.message.USER_ID == user_id && resCheck.data.message.COURSE_ID == courseId;
+            const resCheck = await axios.post('https://localhost:7074/Course/check-enrolled', { courseId: courseId });
+            const flag = resCheck.data.message && resCheck.data.message.user_id == user_id && resCheck.data.message.course_id == courseId;
             setCheckEnrolled(flag);
             console.log(resCheck);
         } catch (error) {
@@ -224,8 +224,8 @@ export default function Course({ User, handleShowForm,callback }) {
         }
         else {
             if (course) {
-                const courseFee = course.course_general[0].fee;
-                let userCurrentCoin = User.COIN;
+                const courseFee = course.course_general.fee;
+                let userCurrentCoin = User.coin;
                 if (!checkPayment(courseFee, userCurrentCoin)) {
                     Swal.fire({
                         icon: 'error',
@@ -234,7 +234,7 @@ export default function Course({ User, handleShowForm,callback }) {
                     })
                 }
                 else {
-                    const adminCoin = courseFee * course.course_general[0].commission * 0.01;
+                    const adminCoin = courseFee * course.course_general.commission * 0.01;
                     const authorCoin = courseFee - adminCoin;
                     userCurrentCoin -= courseFee;
 
@@ -250,7 +250,7 @@ export default function Course({ User, handleShowForm,callback }) {
                             const enrollData = {
                                 user_id: user_id,
                                 admin_id: 1111,
-                                author_id: course.course_general[0].author_id,
+                                author_id: course.course_general.author,
                                 course_id: courseId,
                                 admin_coin: adminCoin,
                                 author_coin: authorCoin,
@@ -281,7 +281,6 @@ export default function Course({ User, handleShowForm,callback }) {
             }
         }
     }
-
     return (
         <>
             <div id="main">
@@ -291,9 +290,9 @@ export default function Course({ User, handleShowForm,callback }) {
                             <div className="course-content">
                                 <div className="course-info">
                                     <div className="course-summary">
-                                        <h1 className="course-summary-title">{course && course.course_general[0].course_name}</h1>
+                                        <h1 className="course-summary-title">{course && course.course_general.course_name}</h1>
                                         <p className="course-summary-intro">
-                                            {course && course.course_general[0].course_desc}
+                                            {course && course.course_general.course_desc}
                                         </p>
                                     </div>
                                     <div className="course-gain">
@@ -310,21 +309,23 @@ export default function Course({ User, handleShowForm,callback }) {
                                 <div className="course-detail">
                                     <h3 className="course-detail-title">Nội dung khóa học</h3>
                                     <ul className="course-detail-summary">
-                                        <li>{course && course.total_chapter[0].numOfChapter + " phần"}</li>
+                                        <li>{course && course.list_learn.length + " phần"}</li>
                                         <li className="divider">.</li>
-                                        <li>{course && course.total_lesson[0].numOfLesson + " bài học"}</li>
+                                        <li>{course && course.list_learn.reduce(function (total, num) {
+                                            return total + num.numOfChapterLess;
+                                        }, 0) + " bài học"}</li>
                                         <li className="divider">.</li>
-                                        <li>{course && "Thời lượng " + msecToTime(course.total_duration[0].totalDuration)}</li>
+                                        <li>{course && "Thời lượng " + msecToTime(course.total_duration)}</li>
                                     </ul>
                                     <div className="course-detail-list">
                                         {course && course.list_learn.map((chapter, index) => {
                                             return (
                                                 <Collapsible key={index} className="list">
-                                                    <CourseChapter chapterTitle={chapter.chapterTitle} numOfChapters={chapter.numOfChapterLess[0].numOfChapterLess} />
+                                                    <CourseChapter chapterTitle={chapter.chapterTitle} numOfChapters={chapter.numOfChapterLess} />
                                                     <div className="list-collapse">
                                                         {chapter.lessons.map((lesson, index) => {
                                                             return (
-                                                                <CourseLesson key={index} lessonName={lesson.LESSON_NAME} />
+                                                                <CourseLesson key={index} lessonName={lesson.lesson_name} />
                                                             )
                                                         })}
                                                     </div>
@@ -345,7 +346,7 @@ export default function Course({ User, handleShowForm,callback }) {
                                     <h3 className="review-title">Đánh giá khóa học</h3>
                                     {checkEnrolled ? <InputReviewBlock
                                         userImg={User.AVATAR_IMG}
-                                        checkCommented={reviews && reviews.filter(e => e.user.USER_ID == user_id).length == 0 ? true : false}
+                                        checkCommented={reviews && reviews.filter(e => e.user.user_id == user_id).length == 0 ? true : false}
                                         showReviews={showReviews}
                                         courseId={courseId}
                                         response={reviews} /> : <div></div>
@@ -353,7 +354,7 @@ export default function Course({ User, handleShowForm,callback }) {
                                     <div className="list-review-block">
                                         {reviews.map((review, index) => {
                                             return (
-                                                <Review key={index} userid={review.user.USER_ID} img={review.user.AVATAR_IMG} username={review.user.FULLNAME} content={review.review_content} state={review.review_state} />
+                                                <Review key={index} userid={review.user.user_id} img={review.user.avatar_img} username={review.user.fullname} content={review.review_content} state={review.review_state} />
                                             )
                                         })}
                                     </div>
@@ -363,9 +364,9 @@ export default function Course({ User, handleShowForm,callback }) {
                         <div className="grid__column-4">
                             <div className="course-purchase">
                                 <div className="course-thumb">
-                                    <img src={course && "/" + course.course_general[0].img} alt="course-thumb" className="center" />
+                                    <img src={course && "/" + course.course_general.img} alt="course-thumb" className="center" />
                                 </div>
-                                <h5 className="course-fee">{course && course.course_general[0].fee == 0 ? "Miễn phí" : course && modifyCourseFee(course.course_general[0].fee)}</h5>
+                                <h5 className="course-fee">{course && course.course_general.fee == 0 ? "Miễn phí" : course && modifyCourseFee(course.course_general.fee)}</h5>
                                 <Link to={checkEnrolled || checkOwner ? "/learn/" + courseId : "/course/" + courseId} onClick={checkEnrolled || checkOwner ? handleAfterEnroll : handleRegister} className="course-btn">
                                     {checkEnrolled || checkOwner ? "VÀO HỌC" : "ĐĂNG KÝ HỌC"}
                                 </Link>
@@ -377,13 +378,15 @@ export default function Course({ User, handleShowForm,callback }) {
                                     <li>
                                         <i className="fas fa-film"></i>
                                         <span>
-                                            Tổng số <strong>{course && course.total_lesson[0].numOfLesson}</strong> bài học
+                                            Tổng số <strong>{course && course.list_learn.reduce(function (total, num) {
+                                                return total + num.numOfChapterLess;
+                                            }, 0)}</strong> bài học
                                         </span>
                                     </li>
                                     <li>
                                         <i className="fas fa-clock"></i>
                                         <span>
-                                            Thời lượng <strong>{course && msecToTime(course.total_duration[0].totalDuration)}</strong>
+                                            Thời lượng <strong>{course && msecToTime(course.total_duration)}</strong>
                                         </span>
                                     </li>
                                     <li>
@@ -395,8 +398,8 @@ export default function Course({ User, handleShowForm,callback }) {
                                         <span>
                                             Tác giả
                                             <strong>
-                                                <Link to={course ? "/profile/" + course.course_general[0].author_id : ""}>
-                                                    {course ? " " + course.course_general[0].fullname : ""}
+                                                <Link to={course ? "/profile/" + course.course_general.author : ""}>
+                                                    {course ? " " + course.course_general.fullname : ""}
                                                 </Link>
                                             </strong>
                                         </span>
