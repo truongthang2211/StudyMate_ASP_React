@@ -212,37 +212,56 @@ public class AdminController : ControllerBase
         var list_in = from l in context.course_requires where l.Course_id.ToString() == course_id select l;
         var list_out = from l in context.course_gains where l.Course_id.ToString() == course_id select l;
         var list_chapter = from l in context.course_chapters where l.Course_id.ToString() == course_id select l;
+        var list_chapter_2 = new List<Course_Chapter>(list_chapter);
         var list_course = new List<object>();
-        foreach (var chapter in list_chapter)
+        foreach (var chapter in list_chapter_2)
         {
             var list_lesson = from l in context.lessons where l.Chapter_id == chapter.Course_chapter_id select l;
+            var list_lesson_2 = new List<Lesson>(list_lesson);
+
             var ob = new { title = chapter.Chapter_name, type = "chapter", id = chapter.Course_chapter_id };
             list_course.Add(ob);
-            foreach (var lesson in list_lesson)
+            foreach (var lesson in list_lesson_2)
             {
                 var ob2 = new { id = lesson.Lesson_id, title = lesson.Lesson_name, URL = lesson.Lesson_url, type = "lesson", error = false };
                 list_course.Add(ob2);
             }
         }
-        var ans = new
+        var listin2 = new List<System.Dynamic.ExpandoObject>();
+        var listout2 = new List<System.Dynamic.ExpandoObject>();
+        var listin_tem = new List<Course_Require>(list_in);
+        var listout_tem = new List<Course_Gain>(list_out);
+        foreach (var item in listin_tem)
         {
-            CourseID = course.Course_id,
-            Author = course.Author_id,
-            Category = main_type,
-            Description = course.Course_desc,
-            Price = (int)course.Fee,
-            Image = "/" + course.Img,
-            SubCategory = course.Course_type_id,
-            Commission = course.Commission,
-            ListIn = list_in,
-            LisOut = list_out,
-            ListCourse = list_course
+            dynamic t = new System.Dynamic.ExpandoObject();
+            t.CONTENT=item.Content;
+            listin2.Add(t);
+        }
+        foreach (var item in listout_tem)
+        {
+            dynamic t = new System.Dynamic.ExpandoObject();
+            t.CONTENT=item.Content;
+            listout2.Add(t);
+        }
+        dynamic MyDynamic = new System.Dynamic.ExpandoObject();
+        MyDynamic.CourseID = course.Course_id;
+        MyDynamic.Author = course.Author_id;
+        MyDynamic.Category = main_type;
+        MyDynamic.Description = course.Course_desc;
+        MyDynamic.Price = (int)course.Fee;
+        MyDynamic.Image = "/" + course.Img;
+        MyDynamic.SubCategory = course.Course_type_id;
+        MyDynamic.Commission = course.Commission;
+        MyDynamic.ListIn = listin2;
+        MyDynamic.ListOut = listout2;
+        MyDynamic.ListCourse = list_course;
+        MyDynamic.CourseTitle = course.Course_name;
 
-        };
+
         return new JsonResult(new
         {
             status = 200,
-            message = ans,
+            message = (MyDynamic),
 
         });
     }
@@ -363,23 +382,24 @@ public class AdminController : ControllerBase
             var body = reader.ReadToEnd();
             dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
             DBContext context = new DBContext();
-            string course_id = (string)data.course_id;
-            var course = (from c in context.courses where c.Course_id.ToString() == course_id select c).FirstOrDefault();
+            int course_id = (int)data.course_id;
+            var course = (from c in context.courses where c.Course_id == course_id select c).FirstOrDefault();
             var noti = new Notification();
+            noti.Created_at = DateTime.Now;
             noti.User_id = course.Author_id;
             noti.Read_state = false;
             if (course.Course_state == "Công khai")
             {
                 course.Course_state = "Bị khóa";
                 string reason = (string)data.reason;
-                noti.Content = "Khóa học " + course.Course_name + "đã bị khóa với lý do: " + reason;
+                noti.Content = "Khóa học " + course.Course_name + " đã bị khóa với lý do: " + reason;
             }
             else if (course.Course_state == "Bị khóa")
             {
                 course.Course_state = "Công khai";
-                noti.Content = "Khóa học " + course.Course_name + "đã được mở khóa: ";
+                noti.Content = "Khóa học " + course.Course_name + " đã được mở khóa: ";
             }
-            context.Add(course);
+            context.Update(course);
             context.Add(noti);
             context.SaveChanges();
             return new JsonResult(new

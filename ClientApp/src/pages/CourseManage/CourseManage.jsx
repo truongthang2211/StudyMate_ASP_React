@@ -32,49 +32,49 @@ const customStyles = {
 };
 const columns2 = [
     {
-        selector: row => <img src={'/' + row.CourseIMG} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
+        selector: row => <img src={'/' + row.courseimg} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
         width: '216px',
         compact: true
     },
     {
         name: 'Tên khóa học',
-        selector: row => <Link to={`/course/${row.CourseID}`} >{row.CourseTitle}</Link>,
+        selector: row => <Link to={`/course/${row.courseid}`} >{row.coursetitle}</Link>,
     },
     {
         name: 'Ngày đăng ký',
-        selector: row => row.Created_at,
+        selector: row => row.created_at,
         compact: true
     },
     {
         name: 'Giá',
-        selector: row => formatNumber(row.Price),
+        selector: row => formatNumber(row.price),
     },
 
     {
         name: 'Hoa hồng',
-        selector: row => row.Commission,
+        selector: row => row.commission,
     },
     {
         name: 'Tình trạng',
-        selector: row => row.Status,
+        selector: row => row.status,
     },
     {
         name: 'Đánh giá',
-        selector: row => <RatingBox up={row.Rate.up} down={row.Rate.down} />,
+        selector: row => <RatingBox up={row.rate.up} down={row.rate.down} />,
         width: '160px',
         compact: true
     },
     {
         name: 'Tiền kiếm được',
-        selector: row => formatNumber(row.Earn) + ' VND',
+        selector: row => formatNumber(row.earn) + ' VND',
     },
     {
         name: 'Số người đăng ký',
-        selector: row => row.Subcribe,
+        selector: row => row.subcribe,
     },
     {
         name: 'Hành động',
-        selector: row => <Link to={"edit/" + row.CourseID} target="_blank"><i className="fas fa-edit"></i></Link>,
+        selector: row => <Link to={"edit/" + row.courseid} target="_blank"><i className="fas fa-edit"></i></Link>,
     },
 ];
 function CourseManage(props) {
@@ -137,7 +137,7 @@ export default CourseManage;
 function Overview() {
     const [data, setData] = useState();
     const updateOverview = async () => {
-        const res = await axios.get('/api/get-overview');
+        const res = await axios.get('https://localhost:7074/course/get-overview');
         console.log(res);
         setData(res.data.message);
 
@@ -149,9 +149,9 @@ function Overview() {
         if (data) {
             updateAnalBox()
             setInfoToday({
-                Revenue: data['payments'].filter(item => moment(item['ENROLL_TIME'], "YYYY-MM-DD HH:mm:ss").format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).reduce((a, b) => a + b.AMOUNT, 0),
-                Register: data['enrollments'].filter(item => moment(item['ENROLL_TIME'], "YYYY-MM-DD HH:mm:ss").format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
-                Learnt: data['learns'].filter(item => moment(item['LEARN_TIME'], "YYYY-MM-DD HH:mm:ss").format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
+                Revenue: data['payments'].filter(item => moment(item['enroll_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).reduce((a, b) => a + b.AMOUNT, 0),
+                Register: data['enrollments'].filter(item => moment(item['enroll_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
+                Learnt: data['learns'].filter(item => moment(item['learn_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
             })
         }
     }, [data])
@@ -190,7 +190,7 @@ function Overview() {
             Timetype = 'months'
             FormatType = 'MM/YYYY';
         }
-        var CreateAt = TYPE != 'learns' ? 'ENROLL_TIME' : 'LEARN_TIME'
+        var CreateAt = TYPE != 'learns' ? 'enroll_time' : 'learn_time'
         var Total = 0;
         for (var i = NumberLabel; i > -1; --i) {
 
@@ -200,7 +200,7 @@ function Overview() {
             if (TYPE != 'payments') {
                 number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).length
             } else {
-                number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).reduce((a, b) => a + b.AMOUNT, 0)
+                number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).reduce((a, b) => a + b.amount, 0)
 
             }
 
@@ -261,7 +261,7 @@ function RegisteredCourse(props) {
     const [searchvalue, setSearchvalue] = useState('');
     const [data, setData] = useState();
     const updateData = async () => {
-        const res = await axios.get('/api/get-registered-courses')
+        const res = await axios.get('https://localhost:7074/course/get-registered-courses')
         console.log(res)
         setData(res.data.message)
     }
@@ -270,23 +270,23 @@ function RegisteredCourse(props) {
     }, [])
     const coursemanageColumn = [
         {
-            selector: row => <img src={'/' + row.IMG} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
+            selector: row => <img src={'/' + row.img} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
             width: '216px',
             compact: true
         },
         {
             name: 'Tên khóa học',
-            selector: row => <Link to={'/course/' + row.COURSE_ID} target="_blank">{row.COURSE_NAME}</Link>,
+            selector: row => <Link to={'/course/' + row.course_id} target="_blank">{row.course_name}</Link>,
             sortable: true,
         },
         {
             name: 'Tác giả',
-            selector: row => <Link to={'/profile/' + row.AUTHOR_ID} target="_blank">{row.FULLNAME}</Link>,
+            selector: row => <Link to={'/profile/' + row.author_id} target="_blank">{row.fullname}</Link>,
             sortable: true,
         },
         {
             name: 'Ngày đăng ký',
-            selector: row => row.ENROLL_TIME,
+            selector: row => row.enroll_time,
             sortable: true,
         },
         {
@@ -319,7 +319,7 @@ function MyCourse() {
     const [mycoursedata, setData] = useState([]);
     useEffect(async () => {
         try {
-            const res = await axios.get('/api/my-course');
+            const res = await axios.get('https://localhost:7074/course/my-course');
             setData([...res.data.message]);
             console.log([...res.data.message]);
         } catch (error) {
@@ -341,37 +341,37 @@ function MyCourse() {
 function MyCourseApproving() {
     const MyCourseAppColumn = [
         {
-            selector: row => <img src={'/' + row.CourseIMG} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
+            selector: row => <img src={'/' + row.courseimg} width="184px" height="130px" style={{ margin: "16px 0", borderRadius: "5px" }} />,
             width: '216px',
             compact: true
         },
         {
             name: 'Tên khóa học',
-            selector: row => row.CourseTitle,
+            selector: row => row.coursetitle,
         },
         {
             name: 'Ngày đăng ký',
-            selector: row => row.CourseCreate,
+            selector: row => row.coursecreate,
             compact: true
         },
         {
             name: 'Giá',
-            selector: row => formatNumber(row.Fee),
+            selector: row => formatNumber(row.fee),
         },
 
         {
             name: 'Tình trạng',
-            selector: row => row.CourseState,
+            selector: row => row.coursestate,
         },
         {
             name: 'Hành động',
-            selector: row => row.ActionType,
+            selector: row => row.actiontype,
         },
     ];
     const [mycoursedata, setData] = useState([]);
     useEffect(async () => {
         try {
-            const res = await axios.get('/api/my-course-app');
+            const res = await axios.get('https://localhost:7074/course/my-course-app');
             setData([...res.data.message]);
             console.log(res);
         } catch (error) {
@@ -395,7 +395,7 @@ function Feature({ feature, id }) {
     useEffect(async () => {
         let url;
         let post_obj;
-        url = '/api/get-course';
+        url = 'https://localhost:7074/admin/get-course';
         post_obj = { course_id: id }
         if (url && post_obj) {
             const res = await axios.post(url, post_obj)

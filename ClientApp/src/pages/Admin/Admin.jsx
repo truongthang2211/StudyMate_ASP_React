@@ -704,7 +704,7 @@ function ApprovalAction(props) {
             confirmButtonText: 'Xác nhận',
             showLoaderOnConfirm: true,
             preConfirm: async (reason) => {
-                const res = await axios.post('https://localhost:7074/Admin/action-course', { _id: props._id, accept: false, reason: reason })
+                const res = await axios.post('https://localhost:7074/Course/action-course', { _id: props._id, accept: false, reason: reason })
                 console.log(res)
                 props.callback();
             },
@@ -712,7 +712,7 @@ function ApprovalAction(props) {
         })
     }
     const handleAccept = async () => {
-        var url = 'https://localhost:7074/Admin/action-course'
+        var url = 'https://localhost:7074/Course/action-course'
         if (props.actiontype == 'Sửa đổi') {
             url = 'https://localhost:7074/Admin/update-course-app'
         }

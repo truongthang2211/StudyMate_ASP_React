@@ -8,7 +8,7 @@ namespace StudyMate_ASP_React.Models
     {
         // Chuỗi kết nối tới CSDL (MS SQL Server)
         private const string connectionString = @"
-                 server=localhost;port=3306;database=studymate;user=root;password=";
+                 server=localhost;port=3306;database=studymate;user=root;password=;ConvertZeroDateTime=True";
 
         // Phương thức OnConfiguring gọi mỗi khi một đối tượng DbContext được tạo
         // Nạp chồng nó để thiết lập các cấu hình, như thiết lập chuỗi kết nối

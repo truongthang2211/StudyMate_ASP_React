@@ -10,7 +10,7 @@ import './Learn.css'
 import moment from 'moment';
 import My404 from '../My404/My404'
 import { ListCourse } from '../../Data.js'
-
+axios.defaults.withCredentials = true
 const ThisUserID = new URLSearchParams(document.cookie.replaceAll("; ", "&")).get('StudyMate');
 export default memo(function Learn({ LearnData, Admin, User }) {
     const [pending, setPending] = useState(true);
@@ -66,7 +66,7 @@ export default memo(function Learn({ LearnData, Admin, User }) {
 
 
             if (!LearnData) {
-                const res = await axios.get(`/api/get-learn/${Tcourse}/${Tlesson}`)
+                const res = await axios.get(`https://localhost:7074/Course/get-learn/${Tcourse}/${Tlesson}`)
                 console.log(res)
                 if (res.data.status == 201) {
                     navigate('/404')
@@ -101,7 +101,7 @@ export default memo(function Learn({ LearnData, Admin, User }) {
     const showComment = async () => {
         if (feature != 'approval') {
             try {
-                const res = await axios.post(`/api/get-comments`, { lesson_id: lesson || subid });
+                const res = await axios.post(`https://localhost:7074/comment/get-comments`, { lesson_id: lesson || subid });
                 console.log(res)
                 setComments(res.data.message)
             } catch (error) {
@@ -135,8 +135,8 @@ export default memo(function Learn({ LearnData, Admin, User }) {
                         //     var t = e.Lesson.filter(r => (r.LESSON_ID == 1116))
                         //     if (t.length > 0) return t
                         // }).filter(c => c)[0][0].LESSON_URL
-                        setData({ ...dataLearning, LastLessonLearnt: parseInt(lesson) })
-                        axios.post('/api/add-learn', { lesson_id: parseInt(lesson) }).then((e) => { console.log(e) })
+                        setData({ ...dataLearning, lastlessonlearnt: parseInt(lesson) })
+                        axios.post('https://localhost:7074/course/add-learn', { lesson_id: parseInt(lesson) }).then((e) => { console.log(e) })
                     }
                     clearInterval(TimerId)
                 }
@@ -153,8 +153,8 @@ export default memo(function Learn({ LearnData, Admin, User }) {
         <div id="left-learning">
             <div className="breadcrumb">
                 <Link className="breadcrumb-item" to="/"><i className="fas fa-home"></i></Link>
-                <Link className="breadcrumb-item" to={`/list-course/${dataLearning.CourseMainType && dataLearning.CourseMainType.COURSE_MAINTYPE_ID}`}>{dataLearning.CourseMainType && dataLearning.CourseMainType.TYPE_NAME}</Link>
-                <Link className="breadcrumb-item" to={`/list-course/null/${dataLearning.CourseType && dataLearning.CourseType.COURSE_SUBTYPE_ID}`}>{dataLearning.CourseType && dataLearning.CourseType.TYPE_NAME}</Link>
+                <Link className="breadcrumb-item" to={`/list-course/${dataLearning.coursemaintype && dataLearning.coursemaintype.course_maintype_id}`}>{dataLearning.coursemaintype && dataLearning.coursemaintype.type_name}</Link>
+                <Link className="breadcrumb-item" to={`/list-course/null/${dataLearning.coursetype && dataLearning.coursetype.course_subtype_id}`}>{dataLearning.coursetype && dataLearning.coursetype.type_name}</Link>
                 <span className="breadcrumb-item active">{dataLearning.coursetitle}</span>
             </div>
             <div className="video-learning">
@@ -174,20 +174,20 @@ export default memo(function Learn({ LearnData, Admin, User }) {
                                     {comments.map((item, index) => {
                                         return (
                                             <li key={index}>
-                                                <Comment key={index} User={item.User} index={index} Content={item.Content}
-                                                    parentComment={item.commentID} UsersVoted={item.UsersVoted} Time={item.CommentTime}
-                                                    Upvote={item.UpVote} Downvote={item.DownVote} handleRepl={onClickRepl}
-                                                    commentID={item.commentID} updateComment={showComment} />
-                                                {item.SubComments.map((item2, index2) => {
+                                                <Comment key={index} User={item.user} index={index} Content={item.content}
+                                                    parentComment={item.commentid} UsersVoted={item.usersvoted} Time={item.commenttime}
+                                                    handleRepl={onClickRepl}
+                                                    commentID={item.commentid} updateComment={showComment} />
+                                                {item.subcomments.map((item2, index2) => {
                                                     if (item2.thisuser) {
                                                         return (<UserComment key={index2} parent_index={index} updateComment={showComment} User={User}
                                                             index={index2} repl parentComment={item2.parent_comment} handleCancel={onClickCancel} />);
                                                     } else {
                                                         return (
-                                                            <Comment parent_index={index} index={index2} key={index2} parentComment={item.commentID}
-                                                                UsersVoted={item2.UsersVoted} updateComment={showComment} Time={item.CommentTime}
-                                                                repl User={item2.User} Content={item2.Content} handleRepl={onClickRepl}
-                                                                commentID={item2.commentID} />
+                                                            <Comment parent_index={index} index={index2} key={index2} parentComment={item.commentid}
+                                                                UsersVoted={item2.usersvoted} updateComment={showComment} Time={item.commenttime}
+                                                                repl User={item2.user} Content={item2.content} handleRepl={onClickRepl}
+                                                                commentID={item2.commentid} />
                                                         );
                                                     }
                                                 })}
@@ -210,16 +210,16 @@ export default memo(function Learn({ LearnData, Admin, User }) {
             {dataLearning.listlearn && dataLearning.listlearn.map((item, index) => {
                 return (
                     <Collapsible className="playlist-wrapper" key={index}>
-                        <Chapter learnt={item.lesson.filter(e => e.lesson_id <= dataLearning.laslessonlearnt).length}
+                        <Chapter learnt={item.lesson.filter(e => e.lesson_id <= dataLearning.lastlessonlearnt).length}
                             title={item.chaptertitle} totalLesson={item.lesson.length} Duration={msecToTime(item.lesson.reduce((a, b) => a + b.duration, 0))} />
                         <div className="playlist-wrapper-list">
                             {
                                 item.lesson.map((less, index2) => {
-                                    if (less.lesson_id == dataLearning.laslessonlearnt + 1 || (dataLearning.laslessonlearnt == -1 && less.lesson_id == lesson) || dataLearning.author == ThisUserID || Admin) {
+                                    if (less.lesson_id == dataLearning.lastlessonlearnt + 1 || (dataLearning.lastlessonlearnt == -1 && less.lesson_id == lesson) || dataLearning.author == ThisUserID || Admin) {
                                         status = 'normal-item'
-                                    } else if (less.lesson_id < dataLearning.laslessonlearnt + 1) {
+                                    } else if (less.lesson_id < dataLearning.lastlessonlearnt + 1) {
                                         status = 'learnt-item'
-                                    } else if (less.lesson_id > dataLearning.laslessonlearnt + 1) {
+                                    } else if (less.lesson_id > dataLearning.lastlessonlearnt + 1) {
                                         status = 'block-item'
                                     }
                                     if ((!Admin && less.lesson_id == lesson) || less.lesson_id == subid || subid == index2) {
@@ -269,12 +269,13 @@ function UserComment(props) {
     }
     const handleSubmit = async () => {
         const data = {
-            lesson_id: lesson,
+            lesson_id: parseInt(lesson),
             content: commentData,
-            parent_comment_id: props.parentComment ? props.parentComment : null,
+            parent_comment_id: props.parentComment ? parseInt(props.parentComment) : null,
         };
         setComment('')
-        const res = await axios.post('/api/add-comment', data)
+        const res = await axios.post('https://localhost:7074/comment/add-comment', data)
+        console.log(res)
         if (res.data.status == 200) {
             props.updateComment();
         }
@@ -307,9 +308,9 @@ function UserComment(props) {
 }
 function Comment(props) {
     const [vote, setVote] = useState(() => {
-        var filter = props.UsersVoted.filter(e => e.USER_ID == ThisUserID)
+        var filter = props.UsersVoted.filter(e => e.user_id == ThisUserID)
         if (filter.length) {
-            return { up: filter[0].COMMENT_VOTE_STATE == 1, down: filter[0].COMMENT_VOTE_STATE == 0 }
+            return { up: filter[0].comment_vote_state == 1, down: filter[0].comment_vote_state == 0 }
         }
         return { up: false, down: false }
     })
@@ -333,7 +334,7 @@ function Comment(props) {
 
         })
         console.log(data)
-        axios.post('/api/comment-vote', data).then((r) => {
+        axios.post('https://localhost:7074/comment/comment-vote', data).then((r) => {
             console.log(r)
             props.updateComment();
         }).catch(error => console.log(error))
@@ -357,7 +358,7 @@ function Comment(props) {
 
         })
         console.log(data)
-        axios.post('/api/comment-vote', data).then((r) => {
+        axios.post('https://localhost:7074/comment/comment-vote', data).then((r) => {
             console.log(r)
             props.updateComment();
         }).catch(error => console.log(error))
@@ -366,11 +367,11 @@ function Comment(props) {
     return (
         <div className={ClassName}>
             <div className="comment-avt">
-                <img className="CommentBox_myAvatar__3Mi09" src={props.User.avt || 'https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png'} alt={props.User.FULLNAME} />
+                <img className="CommentBox_myAvatar__3Mi09" src={props.User.avt || 'https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png'} alt={props.User.fullname} />
             </div>
             <div className="comment-content">
                 <div className="comment-user-name">
-                    <a href="">{props.User.FULLNAME}</a>
+                    <a href="">{props.User.fullname}</a>
                 </div>
                 <div className="comment-body">{props.Content}</div>
                 <div className="comment-footer">
@@ -379,17 +380,17 @@ function Comment(props) {
                             <span onClick={handleUpVote}>
                                 <i className="fas fa-arrow-up font-size-h5 fa-fw"></i>
                             </span>
-                            <span>{props.UsersVoted.filter(e => e.COMMENT_VOTE_STATE == 1).length}</span>
+                            <span>{props.UsersVoted.filter(e => e.comment_vote_state == 1).length}</span>
                         </span>
                         <span className={"downvote " + (vote.down ? "active" : "")}>
                             <span onClick={handleDownVote}>
                                 <i className="fas fa-arrow-down font-size-h5 fa-fw"></i>
                             </span>
-                            <span>{props.UsersVoted.filter(e => e.COMMENT_VOTE_STATE == 0).length}</span>
+                            <span>{props.UsersVoted.filter(e => e.comment_vote_state == 0).length}</span>
                         </span>
                     </span>
                     <span onClick={() => { props.handleRepl(props.index, props.parent_index, props.repl, props.parentComment) }} className="comment-repl" href="">Trả lời</span>
-                    <span className="comment-datetime">{moment(props.Time, "YYYY-MM-DD HH:mm:ss").fromNow()}</span>
+                    <span className="comment-datetime">{moment(props.Time).fromNow()}</span>
                 </div>
             </div>
         </div>

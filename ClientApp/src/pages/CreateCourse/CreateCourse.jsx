@@ -35,7 +35,7 @@ export default function CreateCourse({ User, CourseData, Admin }) {
     const [Data, setData] = useState(CourseData ?? CreateData);
     useEffect(() => {
         if (!CourseData && User) {
-            setData({ ...Data, Author: User.USER_ID, ActionType: 'Thêm mới' })
+            setData({ ...Data, Author: User.user_id, ActionType: 'Thêm mới' })
         }
     }, [User])
     useEffect(() => {
@@ -134,7 +134,7 @@ export default function CreateCourse({ User, CourseData, Admin }) {
                 const newData = { ...Data, ListCourse: newListCourse }
                 console.log(newData)
                 fd.append('data', JSON.stringify(newData))
-                const url = Admin ? "/api/update-course" : "/api/create-course-approval"
+                const url = Admin ? "/api/update-course" : "https://localhost:7074/course/create-course-approval"
                 return axios.post(url, fd, { "enctype": "multipart/form-data" })
                     .then(async (res) => {
                         console.log(res)
@@ -205,7 +205,7 @@ function PageOne(props) {
         props.handleOnchange([['SubCategory', id]])
     }
     function formatNumber(num) {
-        return num?num.toString().replace(/\B(?=(\d{3})+\b)/g, ","):"0";
+        return num ? num.toString().replace(/\B(?=(\d{3})+\b)/g, ",") : "0";
     }
     const onPriceChange = (e) => {
         if (/[a-zA-Z]/.test(e.target.value.toString())) {
@@ -244,7 +244,7 @@ function PageOne(props) {
                         <label htmlFor="title" className="create-course-form-label">Giá bán</label>
                     </div>
                 </div>
-                {props.Admin&&<div className="create-course-input-item">
+                {props.Admin && <div className="create-course-input-item">
                     <div className="input-field">
                         <input type="text" name="Commission" value={formatNumber(props.Data.Commission)} onChange={(e) => onCommissionChange(e)} className="create-course-form-input" placeholder=" " />
                         <label htmlFor="title" className="create-course-form-label">Hoa hồng</label>
@@ -276,7 +276,7 @@ function PageOne(props) {
 
                         {subCategoryList.map((item, index) => {
                             return (
-                                <li onClick={(e) => handleClickSubCategory(item.ID)} key={index} className={props.Data.SubCategory === item.ID ? "category-item selected" : "category-item"}>
+                                <li onClick={(e) => handleClickSubCategory(item.ID)} key={index} className={props.Data.SubCategory == item.ID ? "category-item selected" : "category-item"}>
                                     <p>{item.NAME}</p>
                                     <i className="fas fa-greater-than"></i>
                                 </li>
@@ -300,7 +300,7 @@ function PageTwo(props) {
             <label className="create-course-input-text" htmlFor="">Hãy chọn hình ảnh đại diện cho khóa học của bạn</label>
             <div className="input-field create-course-img">
                 <img src={props.Data.Image} alt="Ảnh đại diện khóa học" />
-                <input onChange={handleOnChange} type="file" name="course-img" id="create-coure-file" />
+                <input onChange={handleOnChange} type="file" name="course_img" id="create-coure-file" />
             </div>
         </div>
     );
@@ -594,7 +594,7 @@ function PageFour(props) {
                                                     <input className="text-input-simple mw-100 border-0 h6" placeholder="Tiêu đề của bài học" type="text" name="title" value={data.title} onChange={(e) => OnChangeHandle(e, index)} />
                                                     <br />
                                                     <input className="text-input-simple mw-100 border-0" placeholder="URL của bài học" type="text" name="URL" value={data.URL} onChange={(e) => OnChangeHandle(e, index)} />
-                                                    {(!data.id )&& <i onClick={() => DeleteHandle(index)} className="fas fa-trash"></i>}
+                                                    {(!data.id) && <i onClick={() => DeleteHandle(index)} className="fas fa-trash"></i>}
                                                 </div>
                                             )}
 
