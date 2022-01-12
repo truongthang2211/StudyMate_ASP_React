@@ -56,11 +56,11 @@ function InputReviewBlock(props) {
                 setReviewContent('');
                 setVoteUp(false);
                 setVoteDown(false);
-                const res = await axios.post('/api/add-review', data);
+                const res = await axios.post('https://localhost:7074/Course/add-review', data);
                 console.log(res)
-                if (res.data.status === 200) {
+                // if (res.data.status === 200) {
                     props.showReviews();
-                }
+                // }
             }
         }
         else {

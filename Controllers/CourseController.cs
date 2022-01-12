@@ -516,33 +516,43 @@ public class CourseController : ControllerBase
         }
     }
 
-    // CHUA HOAN THANH -> DOI CO COOKIES
-    [Route("add-course-review"), HttpPost]
-    public JsonResult AddCourseReview()
+    [Route("add-review"), HttpPost]
+    public async Task AddCourseReview()
     {
         if (HttpContext.Request.Cookies["StudyMate"] != null)
         {
             var reader = new StreamReader(HttpContext.Request.Body);
             var body = reader.ReadToEnd();
             dynamic? data = JsonConvert.DeserializeObject<dynamic>(body);
-            var context = new DBContext();
 
             int user_id = Convert.ToInt32(HttpContext.Request.Cookies["StudyMate"]);
             int course_id = (int)data.course_id;
             int review_state = (int)data.state;
             string content = (string)data.content;
 
-            MySqlConnection conn = context.GetConnection();
-            string str = $"insert into COURSE_REVIEWS values ({user_id},{course_id},{review_state},{content})";
-            MySqlCommand cmd = new MySqlCommand(str, conn);
-            conn.Open();
-            cmd.ExecuteNonQuery();
-            conn.Close();
-            return new JsonResult(new { status = 200, message = "Danh gia khoa hoc thanh cong" });
+            // MySqlConnection conn = context.GetConnection();
+            // string str = $"insert into COURSE_REVIEWS values ({user_id},{course_id},{review_state},{content})";
+            // MySqlCommand cmd = new MySqlCommand(str, conn);
+            // conn.Open();
+            // cmd.ExecuteNonQuery();
+            // conn.Close();
+
+            using (var context = new DBContext())
+            {
+                await context.course_reviews.AddAsync(new Course_Review
+                {
+                    User_id = user_id,
+                    Course_id = course_id,
+                    Course_review_state = review_state,
+                    Content = content
+                });
+                int rows = await context.SaveChangesAsync();
+                System.Console.WriteLine($"{rows} course_review inserted");
+            }
         }
         else
         {
-            return new JsonResult(new { status = 400, message = "Cookies het han" });
+            System.Console.WriteLine($"Insert course_review unsuccessfully");
         }
     }
 
