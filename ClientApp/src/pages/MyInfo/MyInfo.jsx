@@ -105,7 +105,7 @@ function MyInfo({ User }) {
 
             var fd = new FormData(document.querySelector("#frm-info"))
             fd.append('data', JSON.stringify(userInfo))
-            const res = await axios.post('/api/update-myinfo', fd)
+            const res = await axios.post('https://localhost:7074/MyInfo/update-myinfo', fd)
             console.log(res);
 
             if (res.data.status === 200) {
@@ -166,10 +166,16 @@ function MyInfo({ User }) {
                 confirmButtonText: 'Cancel'
             })
         }
-
+        else if (password.newPassword == null || password.newPassword == '') {
+            Swal.fire({
+                text: 'New password is required!',
+                icon: 'warning',
+                confirmButtonText: 'Cancel'
+            })
+        }
         else {
             try {
-                axios.put('/api/update-password', password).then(res => {
+                axios.put('https://localhost:7074/MyInfo/update-password', password).then(res => {
                     console.log(res);
                     if (res.data.status === 200) {
                         Swal.fire({
@@ -227,7 +233,7 @@ function MyInfo({ User }) {
 
                                             <div className="col-md-6 col-xs-12">
                                                 <div className="row myinfo-avt">
-                                                    <img id="AvtPreview" src={userInfo.AVATAR_IMG ?(userInfo.AVATAR_IMG.substring(0,3)=='img' ? `/${userInfo.AVATAR_IMG}`:`${userInfo.AVATAR_IMG}`) : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} className="no-img" />
+                                                    <img id="AvtPreview" src={userInfo.AVATAR_IMG ? (userInfo.AVATAR_IMG.substring(0, 3) == 'img' ? `/${userInfo.AVATAR_IMG}` : `${userInfo.AVATAR_IMG}`) : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} className="no-img" />
                                                 </div>
                                                 <div className="row avatar-selector">
                                                     <div className="form-group UploadAvatar">
@@ -239,7 +245,7 @@ function MyInfo({ User }) {
                                             </div>
                                             <div className="col-md-6 col-xs-12">
                                                 <div className="row myinfo-background">
-                                                    <img id="BackGroundPreview" src={userInfo.BACKGROUND_IMG ?(userInfo.BACKGROUND_IMG.substring(0,3)=='img' ? `/${userInfo.BACKGROUND_IMG}`:`${userInfo.BACKGROUND_IMG}`) : "https://c.wallhere.com/photos/78/3f/FeelsBadMan_Pepe_meme_memes-43635.png!d"} className="no-img" />
+                                                    <img id="BackGroundPreview" src={userInfo.BACKGROUND_IMG ? (userInfo.BACKGROUND_IMG.substring(0, 3) == 'img' ? `/${userInfo.BACKGROUND_IMG}` : `${userInfo.BACKGROUND_IMG}`) : "https://c.wallhere.com/photos/78/3f/FeelsBadMan_Pepe_meme_memes-43635.png!d"} className="no-img" />
 
                                                 </div>
                                                 <div className="row avatar-selector">

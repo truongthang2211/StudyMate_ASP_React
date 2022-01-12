@@ -17,7 +17,7 @@ function Profile(props) {
     }, [user_id])
     useEffect(() => {
 
-        axios.post('/api/get-course-item',{ user_id: user_id}).then(res => {
+        axios.post('https://localhost:7074/Profile/get-course-item', { user_id: user_id }).then(res => {
             console.log(res);
             if (res.data.status === 200) {
                 setCourseItem(res.data.courses);
@@ -196,7 +196,7 @@ export function ProfileHeader({ User }) {
         </div >
     );
 }
-export function ProfileCourseItem({ Option, className, courseItem}) {
+export function ProfileCourseItem({ Option, className, courseItem }) {
 
     // const [author, setAuthor] = useState({
     //     AUTHOR_ID: courseItem.AUTHOR_ID,
