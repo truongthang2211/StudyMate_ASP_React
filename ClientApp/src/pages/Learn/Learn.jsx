@@ -23,17 +23,17 @@ export default memo(function Learn({ LearnData, Admin, User }) {
         console.log(parent)
         const newcomments = [...comments];
         if (repl) {
-            const sub_comment = newcomments[parentindex]['SubComments'][index + 1];
+            const sub_comment = newcomments[parentindex]['subcomments'][index + 1];
             if (!sub_comment || !sub_comment['thisuser'])
-                newcomments[parentindex]['SubComments'].splice(index + 1, 0, { thisuser: true, parent_comment: parent })
-        } else if (!newcomments[index]['SubComments'][0] || !newcomments[index]['SubComments'][0]['thisuser']) {
-            newcomments[index]['SubComments'].splice(0, 0, { thisuser: true, parent_comment: parent })
+                newcomments[parentindex]['subcomments'].splice(index + 1, 0, { thisuser: true, parent_comment: parent })
+        } else if (!newcomments[index]['subcomments'][0] || !newcomments[index]['subcomments'][0]['thisuser']) {
+            newcomments[index]['subcomments'].splice(0, 0, { thisuser: true, parent_comment: parent })
         }
         setComments(newcomments);
     }
     const onClickCancel = (index, parentindex) => {
         const newcomments = [...comments];
-        newcomments[parentindex]['SubComments'].splice(index, 1)
+        newcomments[parentindex]['subcomments'].splice(index, 1)
         setComments(newcomments);
 
     }

@@ -21,7 +21,7 @@ public class CommentController : ControllerBase
         dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
         string lesson_id = (string)data.lesson_id;
         DBContext context = new DBContext();
-        var commentList = from c in context.comment where c.Lesson_id.ToString() == lesson_id select c;
+        var commentList = from c in context.comment where c.Lesson_id.ToString() == lesson_id && c.Parent_comment_id == null select c;
         var commentList_2 = new List<Comment>(commentList);
         var ans = new List<object>();
         foreach (var cmt in commentList_2)
