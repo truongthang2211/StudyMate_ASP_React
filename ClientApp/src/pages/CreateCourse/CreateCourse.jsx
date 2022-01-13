@@ -134,7 +134,7 @@ export default function CreateCourse({ User, CourseData, Admin }) {
                 const newData = { ...Data, ListCourse: newListCourse }
                 console.log(newData)
                 fd.append('data', JSON.stringify(newData))
-                const url = Admin ? "/api/update-course" : "https://localhost:7074/course/create-course-approval"
+                const url = Admin ? "https://localhost:7074/course/update-course" : "https://localhost:7074/course/create-course-approval"
                 return axios.post(url, fd, { "enctype": "multipart/form-data" })
                     .then(async (res) => {
                         console.log(res)

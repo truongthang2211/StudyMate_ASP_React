@@ -31,7 +31,7 @@ function Index() {
 
     }, [])
     const LoadUser = async () => {
-        const res = await axios.get('https://localhost:7074/Login/get-user',{ withCredentials: true })
+        const res = await axios.get('https://localhost:7074/Login/get-user', { withCredentials: true })
         console.log(res);
         if (res.data.user) {
             setUser({ ...res.data.user, loading: false });
@@ -45,14 +45,14 @@ function Index() {
                     <Route path="/admin/:feature" element={<Admin User={User} />} />
                     <Route exact path="/admin/:feature/:action/:id" element={<Admin User={User} />} />
                     <Route exact path="/admin/:feature/:action/:id/:subid" element={<Admin User={User} />} />
-                   
-                    
+
+
                     <Route path="/" element={<UserLayout User={User} handleShowForm={handleShowForm} ShowForm={ShowForm} />} >
                         <Route path="/" element={<Home />} />
                         <Route exact path="/course/:courseId" element={<Course User={User} callback={LoadUser} handleShowForm={handleShowForm} />} />
                         <Route exact path="/learn/:course/:lesson" element={User.loading ? <Home /> : <Learn User={User} />} />
                         <Route exact path="/learn/:course" element={User.loading ? <Home /> : <Learn User={User} />} />
-                        <Route exact path="/profile/:user_id" element={ <Profile User={User} />} />
+                        <Route exact path="/profile/:user_id" element={<Profile User={User} />} />
                         <Route exact path="/myinfo" element={User.loading ? <Home /> : <MyInfo User={User} />} />
                         <Route exact path="/course-manage" element={User.loading ? <Home /> : <CourseManage User={User} />} />
                         <Route exact path="/course-manage/:feature" element={User.loading ? <Home /> : <CourseManage User={User} />} />

@@ -367,7 +367,7 @@ function Comment(props) {
     return (
         <div className={ClassName}>
             <div className="comment-avt">
-                <img className="CommentBox_myAvatar__3Mi09" src={props.User.avt || 'https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png'} alt={props.User.fullname} />
+                <img className="CommentBox_myAvatar__3Mi09" src={props.User && props.User.avatar_img ? `/${props.User.avatar_img}` : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} alt={props.User.fullname} />
             </div>
             <div className="comment-content">
                 <div className="comment-user-name">

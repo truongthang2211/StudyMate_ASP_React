@@ -714,7 +714,7 @@ function ApprovalAction(props) {
     const handleAccept = async () => {
         var url = 'https://localhost:7074/Course/action-course'
         if (props.actiontype == 'Sửa đổi') {
-            url = 'https://localhost:7074/Admin/update-course-app'
+            url = 'https://localhost:7074/Course/update-course-app'
         }
         const res = await axios.post(url, { _id: props._id, accept: true })
         console.log(res)

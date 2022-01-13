@@ -21,7 +21,7 @@ public class ProfileController : ControllerBase
             var body = reader.ReadToEnd();
             dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
 
-            int Cityid = (int)data.City_id;
+            int Cityid = (int)data.city_id;
             var context = new DBContext();
 
             var city = from c in context.cities
@@ -55,7 +55,7 @@ public class ProfileController : ControllerBase
             var reader = new StreamReader(HttpContext.Request.Body);
             var body = reader.ReadToEnd();
             dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
-            int Userid = (int)data.User_id;
+            int Userid = Int32.Parse((string)data.user_id);
             var context = new DBContext();
 
             var courses = (from les in context.lessons
@@ -67,12 +67,12 @@ public class ProfileController : ControllerBase
                            orderby l.Learn_time descending
                            select new { c.Course_id, c.Course_name, c.Img, u.Fullname, u.User_id }).Distinct().Take(3);
 
-            var learntCourse = from c in context.courses
-                               join e in context.enrollments on c.Course_id equals e.Course_id
+            var learntCourse = (from c in context.courses
+                                join e in context.enrollments on c.Course_id equals e.Course_id
                                join u in context.users on c.Author_id equals u.User_id
                                where u.User_id == Userid
                                where c.Course_state == "Công khai"
-                               select new { c.Course_id, c.Course_name, c.Img, u.Fullname, u.User_id };
+                               select new { c.Course_id, c.Course_name, c.Img, u.Fullname, u.User_id }).Distinct();
 
             var uppedCourse = from c in context.courses
                               join u in context.users on c.Author_id equals u.User_id
@@ -94,7 +94,7 @@ public class ProfileController : ControllerBase
             var result = new
             {
                 status = 404,
-                message = ex.InnerException,
+                message = ex.ToString(),
             };
             return new JsonResult(result);
         }

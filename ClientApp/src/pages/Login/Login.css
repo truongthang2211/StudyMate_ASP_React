@@ -757,7 +757,7 @@
 }
 
 .lights-off .site-header::before {
-	/* background-image: url("../../../../public/img/login/header-illustration-dark.svg") */
+	/* background-image: url("../../../public/img/login/header-illustration-dark.svg") */
 }
 
 .site-header-inner {

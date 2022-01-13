@@ -2,23 +2,23 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './Myinfo.css';
-
+import moment from 'moment'
 function MyInfo({ User }) {
 
     //const history = useHistory();
     const [userInfo, setUserInfo] = useState({
-        FULLNAME: '',
-        DATE_OF_BIRTH: "2021-01-01",
-        CITY_ID: '',
-        PHONE: '',
-        SCHOOL: '',
-        FACEBOOK: '',
-        LINKEDLN: '',
-        BIO: '',
+        fullname: '',
+        date_of_birth: "2021-01-01",
+        city_id: '',
+        phone: '',
+        school: '',
+        facebook: '',
+        linkedln: '',
+        bio: '',
     });
 
     const [password, setPassword] = useState({
-        USER_ID: "",
+        user_id: "",
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
@@ -63,21 +63,21 @@ function MyInfo({ User }) {
     const handleDateOfBirthChange = (e) => {
         setUserInfo({
             ...userInfo,
-            DATE_OF_BIRTH: e.target.value
+            date_of_birth: e.target.value
         });
     }
 
     const handleCityChange = (e) => {
         setUserInfo({
             ...userInfo,
-            CITY_ID: e.target.value
+            city_id: e.target.value
         });
     }
 
     const handleSchoolIdChange = (e) => {
         setUserInfo({
             ...userInfo,
-            SCHOOL: e.target.value
+            school: e.target.value
         });
     }
 
@@ -86,14 +86,14 @@ function MyInfo({ User }) {
         setUserInfo({
             ...userInfo,
             //avatar: e.target.files[0]
-            AVATAR_IMG: URL.createObjectURL(img)
+            avatar_img: URL.createObjectURL(img)
         });
     }
     const handleBackgroundImgChange = (e) => {
         let img = e.target.files[0];
         setUserInfo({
             ...userInfo,
-            BACKGROUND_IMG: URL.createObjectURL(img)
+            background_img: URL.createObjectURL(img)
         });
     }
 
@@ -150,7 +150,7 @@ function MyInfo({ User }) {
     const handlePasswordChange = (e) => {
         setPassword({
             ...password,
-            USER_ID: User.USER_ID,
+            user_id: User.user_id,
             [e.target.name]: e.target.value
         });
     }
@@ -233,26 +233,26 @@ function MyInfo({ User }) {
 
                                             <div className="col-md-6 col-xs-12">
                                                 <div className="row myinfo-avt">
-                                                    <img id="AvtPreview" src={userInfo.AVATAR_IMG ? (userInfo.AVATAR_IMG.substring(0, 3) == 'img' ? `/${userInfo.AVATAR_IMG}` : `${userInfo.AVATAR_IMG}`) : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} className="no-img" />
+                                                    <img id="AvtPreview" src={userInfo.avatar_img ? (userInfo.avatar_img.substring(0, 3) == 'img' ? `/${userInfo.avatar_img}` : `${userInfo.avatar_img}`) : "https://genk.mediacdn.vn/thumb_w/600/2015/screen-shot-2015-07-30-at-2-31-57-pm-1438334096188.png"} className="no-img" />
                                                 </div>
                                                 <div className="row avatar-selector">
                                                     <div className="form-group UploadAvatar">
                                                         <label style={{ display: 'block' }}>Ảnh đại diện của bạn</label>
                                                         <label htmlFor="Avatar" className="browse btn btn-primary input-sm" type="button" id="Upload-Ava" style={{ display: 'block' }}>Chọn ảnh</label>
-                                                        <input name="avatar-img" id="Avatar" className="file" type="file" onChange={handleAvatarChange} accept="image/png,image/x-png,image/gif,image/jpeg,image/jpg" />
+                                                        <input name="avatar_img" id="Avatar" className="file" type="file" onChange={handleAvatarChange} accept="image/png,image/x-png,image/gif,image/jpeg,image/jpg" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="col-md-6 col-xs-12">
                                                 <div className="row myinfo-background">
-                                                    <img id="BackGroundPreview" src={userInfo.BACKGROUND_IMG ? (userInfo.BACKGROUND_IMG.substring(0, 3) == 'img' ? `/${userInfo.BACKGROUND_IMG}` : `${userInfo.BACKGROUND_IMG}`) : "https://c.wallhere.com/photos/78/3f/FeelsBadMan_Pepe_meme_memes-43635.png!d"} className="no-img" />
+                                                    <img id="BackGroundPreview" src={userInfo.background_img ? (userInfo.background_img.substring(0, 3) == 'img' ? `/${userInfo.background_img}` : `${userInfo.background_img}`) : "https://c.wallhere.com/photos/78/3f/FeelsBadMan_Pepe_meme_memes-43635.png!d"} className="no-img" />
 
                                                 </div>
                                                 <div className="row avatar-selector">
                                                     <div className="form-group UploadBackground">
                                                         <label style={{ display: 'block' }}>Ảnh nền trang user của bạn</label>
                                                         <label htmlFor="Background" className="browse btn btn-primary input-sm" type="button" id="Upload-Ava" style={{ display: 'block' }}>Chọn ảnh</label>
-                                                        <input name="background-img" id="Background" className="file" type="file" onChange={handleBackgroundImgChange} accept="image/png,image/x-png,image/gif,image/jpeg,image/jpg" />
+                                                        <input name="background_img" id="Background" className="file" type="file" onChange={handleBackgroundImgChange} accept="image/png,image/x-png,image/gif,image/jpeg,image/jpg" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -270,8 +270,8 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-name" className="span-display" style={{ display: "none" }}></span>
-                                                            <input name="FULLNAME" type="text" onChange={handleInput} value={userInfo.FULLNAME || ''} className="form-control is-required" id="name" autoComplete="family-name" aria-required="true" style={{ display: 'block' }} />
-                                                            <label id="name-error" className="error" htmlFor="name">{errorInput.FULLNAME}</label>
+                                                            <input name="fullname" type="text" onChange={handleInput} value={userInfo.fullname || ''} className="form-control is-required" id="name" autoComplete="family-name" aria-required="true" style={{ display: 'block' }} />
+                                                            <label id="name-error" className="error" htmlFor="name">{errorInput.fullname}</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -285,7 +285,7 @@ function MyInfo({ User }) {
                                                         <div className="form-group">
                                                             <span id="span-birthday" className="span-display" style={{ display: "none" }}></span>
 
-                                                            <input name="BirthYear" type="date" onChange={handleDateOfBirthChange} value={userInfo.DATE_OF_BIRTH || ''} id="BirthYear" className="form-control" style={{ display: 'block' }} />
+                                                            <input name="birthyear" type="date" onChange={handleDateOfBirthChange} value={moment(userInfo.date_of_birth).format("yyyy-MM-DD") || ''} id="BirthYear" className="form-control" style={{ display: 'block' }} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -298,8 +298,8 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-phone" className="span-display" style={{ display: "none" }}></span>
-                                                            <input name="PHONE" type="text" onChange={handleInput} value={userInfo.PHONE || ''} className="form-control is-required" id="PhoneNumber" placeholder="Số điện thoại" autoComplete="tel-national" style={{ display: 'block' }} />
-                                                            <label id="phone-error" className="error" htmlFor="phone">{errorInput.PHONE}</label>
+                                                            <input name="phone" type="text" onChange={handleInput} value={userInfo.phone || ''} className="form-control is-required" id="PhoneNumber" placeholder="Số điện thoại" autoComplete="tel-national" style={{ display: 'block' }} />
+                                                            <label id="phone-error" className="error" htmlFor="phone">{errorInput.phone}</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -312,7 +312,7 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-email" className="span-display" style={{ display: "none" }}></span>
-                                                            <input name="email" type="email" value={userInfo.EMAIL || ''} disabled className="form-control" id="email" placeholder="Email" autoComplete="email" style={{ display: 'block' }} />
+                                                            <input name="email" type="email" value={userInfo.email || ''} disabled className="form-control" id="email" placeholder="Email" autoComplete="email" style={{ display: 'block' }} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -325,7 +325,7 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-school" className="span-display" style={{ display: "none" }}></span>
-                                                            <input name="GraduatedSchool" type="text" onChange={handleSchoolIdChange} value={userInfo.SCHOOL || ''} className="form-control" id="GraduatedSchool" autoComplete="graduated-school" aria-required="true" style={{ display: 'block' }} />
+                                                            <input name="graduatedschool" type="text" onChange={handleSchoolIdChange} value={userInfo.school || ''} className="form-control" id="GraduatedSchool" autoComplete="graduated-school" aria-required="true" style={{ display: 'block' }} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -338,7 +338,7 @@ function MyInfo({ User }) {
                                                     </div>
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
-                                                            <select className="form-select" id="StateSelect" name="StateSelect" onChange={handleCityChange} value={userInfo.CITY_ID || "-1"}>
+                                                            <select className="form-select" id="StateSelect" name="stateselect" onChange={handleCityChange} value={userInfo.city_id || "-1"}>
                                                                 <option value="-1" defaultValue="selected">Chọn thành phố</option>
                                                                 <option value="1">Hồ Chí Minh</option>
                                                                 <option value="2">Hà Nội</option>
@@ -404,7 +404,7 @@ function MyInfo({ User }) {
                                                                 <option value="62">Bắc Kạn</option>
                                                                 <option value="63">Cao Bằng</option>
                                                             </select>
-                                                            <label id="StateSelect-error" className="error" htmlFor="StateSelect">{errorInput.CITY_ID}</label>
+                                                            <label id="StateSelect-error" className="error" htmlFor="StateSelect">{errorInput.city_id}</label>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -432,7 +432,7 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-facebook" className="span-display" style={{ display: "none" }} title=""></span>
-                                                            <input type="text" name="FACEBOOK" onChange={handleInput} value={userInfo.FACEBOOK || ''} className="form-control" id="facebook" placeholder="Your profile link" style={{ display: 'block' }} />
+                                                            <input type="text" name="facebook" onChange={handleInput} value={userInfo.facebook || ''} className="form-control" id="facebook" placeholder="Your profile link" style={{ display: 'block' }} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -445,7 +445,7 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <span id="span-linkedIn" className="span-display" style={{ display: "none" }} title=""></span>
-                                                            <input type="text" name="LINKEDIN" onChange={handleInput} value={userInfo.LINKEDIN || ''} className="form-control" id="linkedIn" placeholder="Your profile link" style={{ display: 'block' }} />
+                                                            <input type="text" name="linkedin" onChange={handleInput} value={userInfo.linkedin || ''} className="form-control" id="linkedIn" placeholder="Your profile link" style={{ display: 'block' }} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -459,7 +459,7 @@ function MyInfo({ User }) {
                                                     <div className="col-lg-9 col-sm-8 col-xs-12">
                                                         <div className="form-group">
                                                             <p id="span-Bio" style={{ display: "none" }}></p>
-                                                            <textarea rows="5" name="BIO" onChange={handleInput} value={userInfo.BIO || ''} type="text" className="form-control" id="bio" style={{ display: 'block' }}></textarea>
+                                                            <textarea rows="5" name="bio" onChange={handleInput} value={userInfo.bio || ''} type="text" className="form-control" id="bio" style={{ display: 'block' }}></textarea>
                                                         </div>
                                                     </div>
                                                 </div>

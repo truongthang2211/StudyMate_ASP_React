@@ -213,17 +213,21 @@ public class AdminController : ControllerBase
         var list_out = from l in context.course_gains where l.Course_id.ToString() == course_id select l;
         var list_chapter = from l in context.course_chapters where l.Course_id.ToString() == course_id select l;
         var list_chapter_2 = new List<Course_Chapter>(list_chapter);
-        var list_course = new List<object>();
+        var list_course = new List<System.Dynamic.ExpandoObject>();
         foreach (var chapter in list_chapter_2)
         {
             var list_lesson = from l in context.lessons where l.Chapter_id == chapter.Course_chapter_id select l;
             var list_lesson_2 = new List<Lesson>(list_lesson);
 
-            var ob = new { title = chapter.Chapter_name, type = "chapter", id = chapter.Course_chapter_id };
+            dynamic ob = new System.Dynamic.ExpandoObject();
+            ob.title = chapter.Chapter_name;
+            ob.type = "chapter";
+            ob.id = chapter.Course_chapter_id;
             list_course.Add(ob);
             foreach (var lesson in list_lesson_2)
             {
-                var ob2 = new { id = lesson.Lesson_id, title = lesson.Lesson_name, URL = lesson.Lesson_url, type = "lesson", error = false };
+                dynamic ob2 = new System.Dynamic.ExpandoObject();
+                ob2.id = lesson.Lesson_id; ob2.title = lesson.Lesson_name; ob2.URL = lesson.Lesson_url; ob2.type = "lesson"; ob2.error = false ;
                 list_course.Add(ob2);
             }
         }
@@ -234,13 +238,13 @@ public class AdminController : ControllerBase
         foreach (var item in listin_tem)
         {
             dynamic t = new System.Dynamic.ExpandoObject();
-            t.CONTENT=item.Content;
+            t.CONTENT = item.Content;
             listin2.Add(t);
         }
         foreach (var item in listout_tem)
         {
             dynamic t = new System.Dynamic.ExpandoObject();
-            t.CONTENT=item.Content;
+            t.CONTENT = item.Content;
             listout2.Add(t);
         }
         dynamic MyDynamic = new System.Dynamic.ExpandoObject();
@@ -277,8 +281,8 @@ public class AdminController : ControllerBase
             DBContext context = new DBContext();
             foreach (dynamic app in approval)
             {
-                int Author = app.Author;
-                int SubCategory = app.SubCategory;
+                int Author = (int)app.Author;
+                int SubCategory = (int)app.SubCategory;
                 var author = (from a in context.users where a.User_id == Author select a).FirstOrDefault();
                 var courseType = (from c in context.course_subtypes where c.Course_subtype_id == SubCategory select c).FirstOrDefault();
                 var ob = new

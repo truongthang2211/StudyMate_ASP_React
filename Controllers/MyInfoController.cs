@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,33 +13,65 @@ namespace StudyMate_ASP_React.Controllers;
 public class MyInfoController : ControllerBase
 {
 
-    [Route("api/update-myinfo"), HttpPost]
-    public JsonResult UpdateMyInfo()
+    [Route("update-myinfo"), HttpPost]
+    public JsonResult UpdateMyInfo([FromForm] string data, [FromForm] IFormFile? avatar_img = null, [FromForm] IFormFile? background_img = null)
     {
         try
         {
-            var reader = new StreamReader(HttpContext.Request.Body);
-            var body = reader.ReadToEnd();
-            dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
+            dynamic? data2 = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(data);
 
-            string Email = (string)data.Email;
+            string Email = (string)data2.email;
 
             var context = new DBContext();
             var user = (from u in context.users
                         where u.Email == Email
                         select u).FirstOrDefault();
 
-            user.Fullname = (string)data.Fullname;
-            user.Date_of_birth = (string)data.Date_of_birth;
-            user.City_id = (string)data.City_id;
-            user.Phone = (int)data.Phone;
-            user.School = (string)data.School;
-            user.Facebook = (string)data.Facebook;
-            user.Bio = (string)data.Bio;
+            user.Fullname = (string?)data2.fullname;
+            user.Date_of_birth = Convert.ToDateTime(data2.date_of_birth);
+            user.City_id = (int?)data2.city_id;
+            user.Phone = (string?)data2.phone;
+            user.School = (string?)data2.school;
+            user.Facebook = (string?)data2.facebook;
+            user.Bio = (string?)data2.bio;
 
+
+            if (avatar_img != null)
+            {
+                var file = avatar_img;
+                var path = Directory.GetCurrentDirectory() + @"\ClientApp\public\";
+                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                var FileExtension = Path.GetExtension(fileName);
+
+
+                var newFileName = @"img/user/avatar/" + ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString() + FileExtension;
+                var PathDB = path + newFileName;
+                user.Avatar_img = newFileName;
+                using (FileStream fs = System.IO.File.Create(PathDB))
+                {
+                    file.CopyTo(fs);
+                    fs.Flush();
+                }
+            }
+            if (background_img != null)
+            {
+                var file = background_img;
+                var path = Directory.GetCurrentDirectory() + @"\ClientApp\public\";
+                var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                var FileExtension = Path.GetExtension(fileName);
+
+
+                var newFileName = @"img/user/background/" + ((int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds).ToString() + FileExtension;
+                var PathDB = path + newFileName;
+                user.Background_img = newFileName;
+                using (FileStream fs = System.IO.File.Create(PathDB))
+                {
+                    file.CopyTo(fs);
+                    fs.Flush();
+                }
+            }
             context.Update(user);
             context.SaveChanges();
-
             var result = new
             {
                 status = 200,
@@ -52,14 +85,14 @@ public class MyInfoController : ControllerBase
             var result = new
             {
                 status = 404,
-                message = ex.InnerException,
+                message = ex.ToString(),
             };
             return new JsonResult(result);
         }
     }
 
 
-    [Route("api/update-password"), HttpPut]
+    [Route("update-password"), HttpPut]
     public JsonResult UpdatePassword()
     {
         try
@@ -68,7 +101,7 @@ public class MyInfoController : ControllerBase
             var body = reader.ReadToEnd();
             dynamic? data = JsonConvert.DeserializeObject<System.Dynamic.ExpandoObject>(body);
 
-            int Userid = (int)data.User_id;
+            int Userid = (int)data.user_id;
 
             string currentPassword = (string)data.currentPassword;
             string newPassword = (string)data.newPassword;

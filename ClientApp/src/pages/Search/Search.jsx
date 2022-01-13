@@ -8,7 +8,7 @@ export default function Search() {
     const [Data, setData] = useState();
     const [selectSort, setSelectSort] = useState('MostLearn');
     useEffect(async () => {
-        const res = await axios.post('/api/search-course', { search_data: key });
+        const res = await axios.post('https://localhost:7074/course/search-course', { search_data: key });
         console.log(res);
         setData(res.data.message);
     }, [key])
@@ -21,16 +21,16 @@ export default function Search() {
                 TempData.sort((a, b) => b.enrolled - a.enrolled);
                 break;
             case 'HighRate':
-                TempData.sort((a, b) => b.upVote - a.upVote);
+                TempData.sort((a, b) => b.upvote - a.upvote);
                 break;
             case 'Newest':
-                TempData.sort((a, b) => b.CREATED_AT.localeCompare(a.CREATED_AT));
+                TempData.sort((a, b) => b.created_at.localeCompare(a.created_at));
                 break;
             case 'LowtoHigh':
-                TempData.sort((a, b) => -1*(b.FEE - a.FEE));
+                TempData.sort((a, b) => -1*(b.fee - a.fee));
                 break;
             case 'HightoLow':
-                TempData.sort((a, b) => b.FEE - a.FEE);
+                TempData.sort((a, b) => b.fee - a.fee);
                 break;
             default:
                 break;
@@ -55,15 +55,15 @@ export default function Search() {
                     {Data && Data.map((course, index) =>
                         <HomeCourseItem
                             key={index}
-                            desc={course.COURSE_DESC}
-                            title={course.COURSE_NAME}
-                            author={course.FULLNAME}
-                            img={course.IMG}
-                            fee={course.FEE}
-                            courseId={course.COURSE_ID}
-                            upVote={course.upVote}
-                            downVote={course.downVote}
-                            author_id={course.USER_ID}
+                            desc={course.course_desc}
+                            title={course.course_name}
+                            author={course.fullname}
+                            img={course.img}
+                            fee={course.fee}
+                            courseId={course.course_id}
+                            upVote={course.upvote}
+                            downVote={course.downvote}
+                            author_id={course.user_id}
                         />
                     )}
                 </div>
