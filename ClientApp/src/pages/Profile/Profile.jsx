@@ -198,7 +198,6 @@ export function ProfileHeader({ User }) {
     );
 }
 export function ProfileCourseItem({ Option, className, courseItem }) {
-    console.log(courseItem)
 
     // const [author, setAuthor] = useState({
     //     AUTHOR_ID: courseItem.AUTHOR_ID,

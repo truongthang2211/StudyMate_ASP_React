@@ -1134,9 +1134,16 @@ public class CourseController : ControllerBase
                 where e.USER_ID={id}";
             var cmd = new MySqlCommand(sql, conn);
             var rs = cmd.ExecuteReader();
+
             var ans = new List<object>();
             while (rs.Read())
             {
+                int this_course_id = Int32.Parse(rs[14].ToString());
+                int first_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).Min();
+                int last_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).Max();
+                int first_less = (from l in context.lessons where l.Chapter_id == first_ch select l.Lesson_id).Min();
+                int last_less = (from l in context.lessons where l.Chapter_id == last_ch select l.Lesson_id).Max();
+                var learning = (from l in context.learnings where l.Lesson_id >= first_less && l.Lesson_id <= last_less && l.User_id.ToString()==id select l.Lesson_id).Max();
                 var ob = new
                 {
 
@@ -1156,6 +1163,9 @@ public class CourseController : ControllerBase
                     course_id = rs[14],
                     enroll_time = rs[15].ToString(),
                     paid = rs[16],
+                    first_less = first_less,
+                    last_less = last_less,
+                    learning_less = learning,
                 };
                 ans.Add(ob);
             }
@@ -1225,6 +1235,7 @@ public class CourseController : ControllerBase
                 var earn = reader[0];
                 conn.Close();
                 var subcribe = (from e in context.enrollments where e.Course_id == course.Course_id select e).Count();
+
                 var ob = new
                 {
                     coursetitle = course.Course_name,

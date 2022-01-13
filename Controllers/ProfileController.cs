@@ -70,7 +70,7 @@ public class ProfileController : ControllerBase
             var learntCourse = (from c in context.courses
                                 join e in context.enrollments on c.Course_id equals e.Course_id
                                join u in context.users on c.Author_id equals u.User_id
-                               where u.User_id == Userid
+                               where e.User_id == Userid
                                where c.Course_state == "Công khai"
                                select new { c.Course_id, c.Course_name, c.Img, u.Fullname, u.User_id }).Distinct();
 

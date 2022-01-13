@@ -294,7 +294,15 @@ function RegisteredCourse(props) {
             selector: row => formatNumber(row.paid),
             sortable: true,
         },
-
+        {
+            name: 'Tiến độ',
+            selector: row => {
+                const total = row.last_less - row.first_less+ 1;
+                const learnt = row.learning_less - row.first_less +1;
+                return `${learnt}/${total} (${(learnt*100/total).toFixed(0)}%)`
+            },
+            sortable: true,
+        },
     ];
     return (
         <div className="course-manage-page">

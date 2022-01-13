@@ -72,10 +72,10 @@ export default memo(function Learn({ LearnData, Admin, User }) {
                     navigate('/404')
                 }
                 if (!Admin) {
-                    if (res.data.message.LastLessonLearnt == -1) {
-                        navigate(`/learn/${Tcourse}/${res.data.message.ListLearn[0].Lesson[0].LESSON_ID}`)
+                    if (res.data.message.lastlessonlearnt == -1) {
+                        navigate(`/learn/${Tcourse}/${res.data.message.listlearn[0].lesson[0].lesson_id}`)
                     } else if (!lesson) {
-                        navigate(`/learn/${Tcourse}/${res.data.message.LastLessonLearnt + 1}`)
+                        navigate(`/learn/${Tcourse}/${res.data.message.lastlessonlearnt + 1}`)
                     } else {
                         navigate(`/learn/${Tcourse}/${Tlesson}`)
                     }
@@ -111,8 +111,9 @@ export default memo(function Learn({ LearnData, Admin, User }) {
 
     }
     useEffect(() => {
-        showComment();
-        // console.log('testest')
+        if (lesson || subid) {
+            showComment();
+        }
     }, [lesson, subid])
     const handleLesson = (lesson_url, lesson_id, status) => {
         let url = '/learn/';
@@ -291,7 +292,7 @@ function UserComment(props) {
                     <textarea ref={commentRef} className="comment-input" autoFocus
                         placeholder="Viết gì gì đó đi..." tabIndex="0" dir="ltr" spellCheck="false"
                         autoComplete="off" autoCorrect="off" autoCapitalize="off" onPaste={handleonPaste} onKeyDown={handleKeyDown}
-                        onInput={handleonInput} onChange={(e) => console.log('thang dep trai')} value={commentData} onChange={handleOnChange}></textarea>
+                        onInput={handleonInput} value={commentData} onChange={handleOnChange}></textarea>
                     <div>
                         <button onClick={handleSubmit} className="btn btn-comment">
                             Bình luận
