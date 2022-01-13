@@ -372,7 +372,7 @@ function Comment(props) {
             </div>
             <div className="comment-content">
                 <div className="comment-user-name">
-                    <a href="">{props.User.fullname}</a>
+                    <Link to={`/profile/${props.User.user_id}`}>{props.User.fullname}</Link>
                 </div>
                 <div className="comment-body">{props.Content}</div>
                 <div className="comment-footer">

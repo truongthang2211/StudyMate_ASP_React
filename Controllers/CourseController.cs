@@ -891,6 +891,7 @@ public class CourseController : ControllerBase
             var noti = new Notification();
             noti.User_id = (int)approval.Author;
             noti.Read_state = false;
+            noti.Created_at=DateTime.Now;
             var app = new Approval();
             app.Course_id = course.Course_id;
             app.Accept = accept;
