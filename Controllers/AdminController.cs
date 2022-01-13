@@ -167,7 +167,7 @@ public class AdminController : ControllerBase
                 });
             }
             var courselist = from c in context.courses select c;
-            var payments = from p in context.payments join e in context.enrollments on p.Enrollment_id equals e.Enrollment_id select e.Enroll_time;
+            var payments = from p in context.payments join e in context.enrollments on p.Enrollment_id equals e.Enrollment_id select new{p.Amount,e.Enroll_time};
             var accounts = from a in context.accounts select a;
             var ans = new
             {

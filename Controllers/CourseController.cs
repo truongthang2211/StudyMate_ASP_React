@@ -707,7 +707,10 @@ public class CourseController : ControllerBase
             context.courses.Update(course);
             context.SaveChanges();
             context.Entry(course).GetDatabaseValues();
-
+            var c_re = (from c in context.course_requires where c.Course_id == course.Course_id select c).ToList();
+            context.course_requires.RemoveRange(c_re);
+            var c_ga = (from c in context.course_gains where c.Course_id == course.Course_id select c).ToList();
+            context.course_gains.RemoveRange(c_ga);
 
             foreach (var item in data2.ListIn)
             {
@@ -1194,11 +1197,14 @@ public class CourseController : ControllerBase
             DBContext context = new DBContext();
             var enroll = from e in context.enrollments join c in context.courses on e.Course_id equals c.Course_id where c.Author_id.ToString() == id select e;
             var payments = from p in context.payments join e in context.enrollments on p.Enrollment_id equals e.Enrollment_id where p.Receiver_id.ToString() == id select new { p.Amount, e.Enroll_time };
-            var learns = (from l in context.learnings where l.User_id.ToString() == id select new{
-                user_id=l.User_id,
-                lesson_id = l.Lesson_id,
-                learn_time=l.Learn_time
-            });
+            var learns = (from l in context.learnings
+                          where l.User_id.ToString() == id
+                          select new
+                          {
+                              user_id = l.User_id,
+                              lesson_id = l.Lesson_id,
+                              learn_time = l.Learn_time
+                          });
             var ans = new
             {
                 learns = learns,

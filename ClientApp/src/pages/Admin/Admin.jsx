@@ -249,7 +249,7 @@ function Overview() {
             if (TYPE != 'payments') {
                 number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).length
             } else {
-                number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).reduce((a, b) => a + b.AMOUNT, 0)
+                number = data[TYPE].filter(item => moment(item[CreateAt], "YYYY-MM-DD HH:mm:ss").format(FormatType) == thisMoment.format(FormatType)).reduce((a, b) => a + b.amount, 0)
 
             }
             DataAnal[0].data.push(number)

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import HomeCourseItem from '../../components/HomeCourseItem';
 import './Search.css'
+import moment from 'moment';
 export default function Search() {
     const { key } = useParams();
     const [Data, setData] = useState();
@@ -24,7 +25,7 @@ export default function Search() {
                 TempData.sort((a, b) => b.upvote - a.upvote);
                 break;
             case 'Newest':
-                TempData.sort((a, b) => b.created_at.localeCompare(a.created_at));
+                TempData.sort((a, b) => moment(b.created_at)-(moment(a.created_at)));
                 break;
             case 'LowtoHigh':
                 TempData.sort((a, b) => -1*(b.fee - a.fee));
