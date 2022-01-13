@@ -345,7 +345,7 @@ export default function Course({ User, handleShowForm, callback }) {
                                 <div className="course-reviews">
                                     <h3 className="review-title">Đánh giá khóa học</h3>
                                     {checkEnrolled ? <InputReviewBlock
-                                        userImg={User.AVATAR_IMG}
+                                        userImg={User.avatar_img}
                                         checkCommented={reviews && reviews.filter(e => e.user.user_id == user_id).length == 0 ? true : false}
                                         showReviews={showReviews}
                                         courseId={courseId}
