@@ -1139,11 +1139,12 @@ public class CourseController : ControllerBase
             while (rs.Read())
             {
                 int this_course_id = Int32.Parse(rs[14].ToString());
-                int first_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).Min();
-                int last_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).Max();
+                int first_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).DefaultIfEmpty().Min();
+                int last_ch = (from c in context.course_chapters where c.Course_id == this_course_id select c.Course_chapter_id).DefaultIfEmpty().Max();
                 int first_less = (from l in context.lessons where l.Chapter_id == first_ch select l.Lesson_id).Min();
                 int last_less = (from l in context.lessons where l.Chapter_id == last_ch select l.Lesson_id).Max();
-                var learning = (from l in context.learnings where l.Lesson_id >= first_less && l.Lesson_id <= last_less && l.User_id.ToString()==id select l.Lesson_id).Max();
+                var learning = (from l in context.learnings where l.Lesson_id >= first_less && l.Lesson_id <= last_less && l.User_id.ToString() == id select l.Lesson_id).DefaultIfEmpty().Max();
+                learning = learning == 0 ? first_less - 1 : learning;
                 var ob = new
                 {
 
@@ -1193,10 +1194,15 @@ public class CourseController : ControllerBase
             DBContext context = new DBContext();
             var enroll = from e in context.enrollments join c in context.courses on e.Course_id equals c.Course_id where c.Author_id.ToString() == id select e;
             var payments = from p in context.payments join e in context.enrollments on p.Enrollment_id equals e.Enrollment_id where p.Receiver_id.ToString() == id select new { p.Amount, e.Enroll_time };
+            var learns = (from l in context.learnings where l.User_id.ToString() == id select new{
+                user_id=l.User_id,
+                lesson_id = l.Lesson_id,
+                learn_time=l.Learn_time
+            });
             var ans = new
             {
+                learns = learns,
                 payments = payments,
-                learns = from l in context.learnings where l.User_id.ToString() == id select l,
                 enrollments = enroll,
             };
             return new JsonResult(new

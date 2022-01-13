@@ -149,7 +149,7 @@ function Overview() {
         if (data) {
             updateAnalBox()
             setInfoToday({
-                Revenue: data['payments'].filter(item => moment(item['enroll_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).reduce((a, b) => a + b.AMOUNT, 0),
+                Revenue: data['payments'].filter(item => moment(item['enroll_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).reduce((a, b) => a + b.amount, 0),
                 Register: data['enrollments'].filter(item => moment(item['enroll_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
                 Learnt: data['learns'].filter(item => moment(item['learn_time']).format('DD/MM/YYYY') == moment().format('DD/MM/YYYY')).length,
             })
