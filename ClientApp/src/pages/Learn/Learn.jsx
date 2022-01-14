@@ -186,7 +186,7 @@ export default memo(function Learn({ LearnData, Admin, User }) {
                                                     } else {
                                                         return (
                                                             <Comment parent_index={index} index={index2} key={index2} parentComment={item.commentid}
-                                                                UsersVoted={item2.usersvoted} updateComment={showComment} Time={item.commenttime}
+                                                                UsersVoted={item2.usersvoted} updateComment={showComment} Time={item2.commenttime}
                                                                 repl User={item2.user} Content={item2.content} handleRepl={onClickRepl}
                                                                 commentID={item2.commentid} />
                                                         );

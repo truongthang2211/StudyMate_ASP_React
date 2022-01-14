@@ -170,7 +170,7 @@ public class CourseController : ControllerBase
         {
             int total_upvote = GetUpvote(course.Course_id);
             int total_downvote = GetDownvote(course.Course_id);
-            IQueryable<User> author = GetCourseAuthor(course.Course_id);
+            IQueryable<User> author = GetCourseAuthor(course.Author_id);
             var obj = new
             {
                 course = course,
@@ -209,7 +209,7 @@ public class CourseController : ControllerBase
         {
             int total_upvote = GetUpvote(course.Course_id);
             int total_downvote = GetDownvote(course.Course_id);
-            IQueryable<User> author = GetCourseAuthor(course.Course_id);
+            IQueryable<User> author = GetCourseAuthor(course.Author_id);
             var obj = new
             {
                 course = course,
