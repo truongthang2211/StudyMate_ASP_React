@@ -8,7 +8,12 @@ dotnet restore (chỉ chạy 1 lần duy nhất)
 dotnet run (để chạy server)
 ```
 
+Tạo database tên `studymate` và import dữ liệu với file studymate.sql vào
+
+Sau khi chạy lệnh dotnet run xong thì:
+
 https://localhost:44481
 tài khoản user là: username: xuanthulab | pass: 123
+
 https://localhost:44481/admin
 tài khoản admin là: username: admin | pass: 123
