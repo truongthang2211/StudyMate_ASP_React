@@ -12,6 +12,8 @@ Tạo database tên `studymate` và import dữ liệu với file studymate.sql 
 
 Sau khi chạy lệnh dotnet run xong thì:
 
+Vào trang https://localhost:7074, một lúc sau sẽ chuyển sang https://localhost:44481
+
 https://localhost:44481
 tài khoản user là: username: xuanthulab | pass: 123
 
