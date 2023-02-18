@@ -11,7 +11,7 @@
     "StudyMate_ASP_React_v2": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7001;http://localhost:5041",
+      "applicationUrl": "https://localhost:7074;http://localhost:5254",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
