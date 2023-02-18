@@ -3,15 +3,15 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:1938",
-      "sslPort": 44372
+      "applicationUrl": "http://localhost:39696",
+      "sslPort": 44301
     }
   },
   "profiles": {
-    "StudyMate_ASP_React": {
+    "StudyMate_ASP_React_v2": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7074;http://localhost:5254",
+      "applicationUrl": "https://localhost:7001;http://localhost:5041",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"

@@ -1,26 +1,9 @@
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using StudyMate_ASP_React.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddScoped(sp => ActivatorUtilities.CreateInstance<DBContext>(sp));
 
-var MyAllowSpecificOrigins = "AllowSetOrigins";
 builder.Services.AddControllersWithViews();
-builder.Services.Configure<KestrelServerOptions>(options =>
-            {
-                options.AllowSynchronousIO = true;
-            }); ;
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(MyAllowSpecificOrigins,
-                      builder =>
-                      {
-                          builder.WithOrigins("https://localhost:44481").AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowedToAllowWildcardSubdomains();
-                      });
-});
-builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,8 +20,8 @@ app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "/{controller}/{action}");
+    pattern: "{controller}/{action=Index}/{id?}");
 
-app.MapFallbackToFile("index.html");
-app.UseCors();
+app.MapFallbackToFile("index.html"); ;
+
 app.Run();
