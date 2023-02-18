@@ -7,18 +7,26 @@ import Footer from '../../components/Footer';
 
 function Home() {
     const [data, setData] = useState([]);
-    useEffect(async () => {
-        const resData = await axios.get('https://localhost:7074/Course/get-courses');
+    useEffect(() => {
+      (async () => {
+        const resData = await axios.get(
+          "https://localhost:7074/Course/get-courses"
+        );
         console.log(resData);
         setData(resData.data.message);
+      })();
     }, []);
 
     const [courses, setCourses] = useState({});
-    useEffect(async () => {
-        const resCourses = await axios.get('https://localhost:7074/Course/get-courses-homepage');
+    useEffect(() => {
+      (async () => {
+        const resCourses = await axios.get(
+          "https://localhost:7074/Course/get-courses-homepage"
+        );
         setCourses(resCourses.data.message);
         console.log(resCourses);
-    }, [])
+      })();
+    }, []);
 
     const courseTypes = ['Các khóa nổi bật', 'Tin học văn phòng', 'Công nghệ thông tin'];
 
